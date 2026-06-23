@@ -54,7 +54,7 @@ export const useDownloadStore = create<DownloadState>()(
           // For series, save inside a folder
           let filePath;
           if (item.type === 'series') {
-            const seasonFolder = item.seasonTitle ? `_${item.seasonTitle.replace(/[^a-z0-9]/gi, '_')}` : '';
+
             const epFile = (item.episodeName || item.id).replace(/[^a-z0-9]/gi, '_');
             const safeDir = await join(baseDir, safeTitle);
             filePath = await join(safeDir, `${epFile}.mp4`);

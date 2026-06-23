@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDownloadStore, DownloadItem } from '../lib/zustand/downloadStore';
 import { Play, ArrowLeft, Trash2 } from 'lucide-react';

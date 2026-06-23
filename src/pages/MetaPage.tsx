@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import useWatchListStore from '../lib/zustand/watchListStore';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Play, BookmarkPlus, Share2, Video, Download, Loader2, BookmarkCheck, Trash2 } from 'lucide-react';
+import { ArrowLeft, BookmarkPlus, Video, Download, Loader2, BookmarkCheck, Trash2 } from 'lucide-react';
 import { useContentDetails } from '../lib/hooks/useContentInfo';
 import { useEpisodes } from '../lib/hooks/useEpisodes';
 import useContentStore from '../lib/zustand/contentStore';
@@ -9,7 +9,7 @@ import { useDownloadStore } from '../lib/zustand/downloadStore';
 import { providerManager } from '../lib/services/ProviderManager';
 import { DownloadServerDialog } from '../components/DownloadServerDialog';
 import { CustomSelect } from '../components/CustomSelect';
-import { Link, Stream, EpisodeLink } from '../lib/providers/types';
+import { Link, Stream } from '../lib/providers/types';
 import { settingsStorage } from '../lib/storage/SettingsStorage';
 import './MetaPage.css';
 
@@ -321,14 +321,6 @@ export const MetaPage: React.FC = () => {
     setDialogStreams([]);
   };
 
-  const handleSeasonChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedTitle = e.target.value;
-    const season = info.linkList.find((l: Link) => l.title === selectedTitle);
-    if (season) {
-      setActiveSeason(season);
-      localStorage.setItem(`vega_season_${link}`, season.title);
-    }
-  };
 
   return (
     <div className="meta-page">

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './DownloadsPage.css';
 
 export const DownloadsPage = () => {
-  const { downloads, pauseDownload, resumeDownload, cancelDownload, removeDownload } = useDownloadStore();
+  const { downloads, pauseDownload, resumeDownload, cancelDownload } = useDownloadStore();
   const navigate = useNavigate();
 
   const allDownloads = Object.values(downloads);

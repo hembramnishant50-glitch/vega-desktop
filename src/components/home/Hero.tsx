@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Info } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useHeroMetadata } from '../../lib/hooks/useHomePageData';
 import { useNavigate } from 'react-router-dom';
 import useContentStore from '../../lib/zustand/contentStore';
@@ -36,10 +36,6 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
   const logoUrl = meta?.logo;
   const description = meta?.description || meta?.plot || '';
 
-  const handleInfoClick = () => {
-    // Navigate to details page. Ensure link is encoded to pass as URL param safely.
-    navigate(`/content/${encodeURIComponent(post.link)}`);
-  };
 
   const handlePlayClick = () => {
     // For now, redirect to details page. Later it will directly play or show episodes.

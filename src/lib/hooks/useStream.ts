@@ -3,7 +3,7 @@ import {useState, useEffect, useMemo} from 'react';
 
 import {providerManager} from '../services/ProviderManager';
 import {settingsStorage} from '../storage';
-import {ifExists} from '../file/ifExists';
+
 import {Stream} from '../providers/types';
 import {useDownloadStore} from '../zustand/downloadStore';
 
