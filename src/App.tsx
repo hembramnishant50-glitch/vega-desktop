@@ -12,6 +12,7 @@ import { WafDialog } from './components/WafDialog';
 import useThemeStore from './lib/zustand/themeStore';
 
 import { initDownloadListeners } from './lib/zustand/downloadStore';
+import { useAppUpdater } from './lib/hooks/useAppUpdater';
 
 import { DownloadsPage } from './pages/DownloadsPage';
 import { DownloadsSeriesPage } from './pages/DownloadsSeriesPage';
@@ -26,6 +27,7 @@ function hexToRgb(hex: string) {
 
 export default function App() {
   initDownloadListeners();
+  useAppUpdater();
 
   const { primary, themeBackground } = useThemeStore();
 

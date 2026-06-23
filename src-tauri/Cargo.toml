@@ -30,6 +30,7 @@ reqwest = { version = "0.12", features = ["stream", "rustls-tls"], default-featu
 futures-util = "0.3"
 tokio = { version = "1", features = ["sync", "fs", "io-util", "time"] }
 tauri-plugin-store = "2"
+tauri-plugin-upload = "2.4.0"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

@@ -124,7 +124,8 @@ export class SettingsStorage {
   }
 
   isAutoDownloadEnabled(): boolean {
-    return mainStorage.getBool(SettingsKeys.AUTO_DOWNLOAD);
+    const val = mainStorage.getBool(SettingsKeys.AUTO_DOWNLOAD);
+    return val === null ? true : val;
   }
 
   setAutoDownloadEnabled(enabled: boolean): void {

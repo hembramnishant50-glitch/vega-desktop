@@ -4,6 +4,7 @@ import { themes, socialLinks } from "../lib/constants";
 import { Monitor, Check, Code } from "lucide-react";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
+import { checkAppUpdates } from '../lib/hooks/useAppUpdater';
 import "./SettingsPage.css";
 
 export const SettingsPage: React.FC = () => {
@@ -124,6 +125,13 @@ export const SettingsPage: React.FC = () => {
               <div className="settings-info">
                 <h3 className="label-lg">Vega Desktop</h3>
                 <p className="body-md text-muted">{appVersion}</p>
+                <button 
+                  className="theme-toggle-btn active mt-sm"
+                  onClick={() => checkAppUpdates(true)}
+                  style={{ width: 'fit-content', padding: '6px 12px', marginTop: '8px' }}
+                >
+                  Check for Updates
+                </button>
               </div>
               <div className="flex gap-3">
                 <a

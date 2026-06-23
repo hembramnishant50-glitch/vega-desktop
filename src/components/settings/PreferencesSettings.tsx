@@ -8,10 +8,12 @@ const QUALITIES = ['360p', '480p', '720p', '1080p', '4k'];
 export const PreferencesSettings: React.FC = () => {
   const [downloadLocation, setDownloadLocation] = useState<string>('vega');
   const [excludedQualities, setExcludedQualities] = useState<string[]>([]);
+  const [autoInstallUpdates, setAutoInstallUpdates] = useState<boolean>(true);
 
   useEffect(() => {
     setDownloadLocation(settingsStorage.getDownloadLocation());
     setExcludedQualities(settingsStorage.getExcludedQualities());
+    setAutoInstallUpdates(settingsStorage.isAutoDownloadEnabled());
   }, []);
 
   const handleChangeDir = async () => {
@@ -43,6 +45,12 @@ export const PreferencesSettings: React.FC = () => {
     settingsStorage.setExcludedQualities(updated);
   };
 
+  const handleToggleAutoInstall = () => {
+    const nextState = !autoInstallUpdates;
+    setAutoInstallUpdates(nextState);
+    settingsStorage.setAutoDownloadEnabled(nextState);
+  };
+
   return (
     <div className="preferences-settings">
       {/* Download Directory */}
@@ -69,6 +77,22 @@ export const PreferencesSettings: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="settings-divider" />
+
+      {/* Auto Install Updates */}
+      <div className="settings-row">
+        <div className="settings-info">
+          <h3 className="label-lg">Auto Install App Updates</h3>
+          <p className="body-md text-muted">Automatically download and install new versions of Vega</p>
+        </div>
+        <button 
+          className={`theme-toggle-btn ${autoInstallUpdates ? 'active' : ''}`}
+          onClick={handleToggleAutoInstall}
+        >
+          {autoInstallUpdates ? 'ON' : 'OFF'}
+        </button>
       </div>
       
       <div className="settings-divider" />
