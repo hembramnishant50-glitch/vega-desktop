@@ -1,20 +1,21 @@
-import React from 'react';
-import useThemeStore from '../lib/zustand/themeStore';
-import { themes, socialLinks } from '../lib/constants';
-import { Monitor, Check, Code, Coffee } from 'lucide-react';
-import { SubtitleSettings } from '../components/settings/SubtitleSettings';
-import { PreferencesSettings } from '../components/settings/PreferencesSettings';
-import './SettingsPage.css';
+import React from "react";
+import useThemeStore from "../lib/zustand/themeStore";
+import { themes, socialLinks } from "../lib/constants";
+import { Monitor, Check, Code } from "lucide-react";
+import { SubtitleSettings } from "../components/settings/SubtitleSettings";
+import { PreferencesSettings } from "../components/settings/PreferencesSettings";
+import "./SettingsPage.css";
 
 export const SettingsPage: React.FC = () => {
-  const { primary, themeBackground, setPrimary, setThemeBackground } = useThemeStore();
-  const [appVersion, setAppVersion] = React.useState('Loading...');
+  const { primary, themeBackground, setPrimary, setThemeBackground } =
+    useThemeStore();
+  const [appVersion, setAppVersion] = React.useState("Loading...");
 
   React.useEffect(() => {
-    import('@tauri-apps/api/app')
-      .then(app => app.getVersion())
-      .then(v => setAppVersion(`Version ${v}`))
-      .catch(() => setAppVersion('Version 1.0.0'));
+    import("@tauri-apps/api/app")
+      .then((app) => app.getVersion())
+      .then((v) => setAppVersion(`Version ${v}`))
+      .catch(() => setAppVersion("Version 1.0.0"));
   }, []);
 
   return (
@@ -30,23 +31,24 @@ export const SettingsPage: React.FC = () => {
             <Monitor size={20} /> Appearance
           </h2>
           <div className="settings-card">
-
             {/* Background Theme */}
             <div className="settings-row">
               <div className="settings-info">
                 <h3 className="label-lg">Background Theme</h3>
-                <p className="body-md text-muted">Choose the overall background color of the app</p>
+                <p className="body-md text-muted">
+                  Choose the overall background color of the app
+                </p>
               </div>
               <div className="theme-toggle-group">
                 <button
-                  className={`theme-toggle-btn ${themeBackground === 'oled' ? 'active' : ''}`}
-                  onClick={() => setThemeBackground('oled')}
+                  className={`theme-toggle-btn ${themeBackground === "oled" ? "active" : ""}`}
+                  onClick={() => setThemeBackground("oled")}
                 >
                   Black
                 </button>
                 <button
-                  className={`theme-toggle-btn ${themeBackground === 'gray' ? 'active' : ''}`}
-                  onClick={() => setThemeBackground('gray')}
+                  className={`theme-toggle-btn ${themeBackground === "gray" ? "active" : ""}`}
+                  onClick={() => setThemeBackground("gray")}
                 >
                   Gray
                 </button>
@@ -65,21 +67,29 @@ export const SettingsPage: React.FC = () => {
             <div className="settings-row">
               <div className="settings-info">
                 <h3 className="label-lg">Accent Color</h3>
-                <p className="body-md text-muted">Choose your preferred primary color</p>
+                <p className="body-md text-muted">
+                  Choose your preferred primary color
+                </p>
               </div>
               <div className="accent-color-grid">
-                {themes.map(t => {
-                  const isMatch = primary?.toLowerCase() === t.color?.toLowerCase();
+                {themes.map((t) => {
+                  const isMatch =
+                    primary?.toLowerCase() === t.color?.toLowerCase();
                   return (
                     <button
                       key={t.name}
-                      className={`accent-color-btn ${isMatch ? 'active' : ''}`}
+                      className={`accent-color-btn ${isMatch ? "active" : ""}`}
                       style={{ backgroundColor: t.color }}
                       onClick={() => setPrimary(t.color)}
                       title={t.name}
                       aria-label={`Set accent color to ${t.name}`}
                     >
-                      {isMatch && <Check size={16} color={t.color === '#FFFFFF' ? '#000' : '#FFF'} />}
+                      {isMatch && (
+                        <Check
+                          size={16}
+                          color={t.color === "#FFFFFF" ? "#000" : "#FFF"}
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -100,9 +110,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Subtitles Group */}
         <section className="settings-group">
-          <h2 className="title-md mb-sm flex items-center gap-2">
-            Subtitles
-          </h2>
+          <h2 className="title-md mb-sm flex items-center gap-2">Subtitles</h2>
           <div className="settings-card">
             <SubtitleSettings />
           </div>
@@ -131,7 +139,6 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         </section>
-
       </div>
     </div>
   );
