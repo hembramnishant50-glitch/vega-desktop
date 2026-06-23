@@ -119,15 +119,6 @@ export const SettingsPage: React.FC = () => {
                 >
                   <Code size={20} />
                 </a>
-                <a
-                  href={socialLinks.sponsor}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="social-btn"
-                  title="Sponsor"
-                >
-                  <Coffee size={20} />
-                </a>
               </div>
             </div>
           </div>

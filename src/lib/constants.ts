@@ -9,7 +9,7 @@ export const FLAGS = {
 export const defaultDownloadFolder = 'vega'; // Will be resolved via Tauri FS
 export const downloadFolder = defaultDownloadFolder;
 
-export const themes: {name: string; color: string}[] = [
+export const themes: { name: string; color: string }[] = [
   {
     name: 'Vega',
     color: '#FF6347',
@@ -49,7 +49,7 @@ export const themes: {name: string; color: string}[] = [
 ];
 
 export const socialLinks = {
-  github: 'https://github.com/Zenda-Cross/vega-app',
+  github: 'https://github.com/vega-org/vega-desktop',
   discord: 'https://discord.gg/cr42m6maWy',
   sponsor: 'https://github.com/sponsors/Zenda-Cross',
 };
