@@ -17,6 +17,7 @@ import { DownloadsPage } from './pages/DownloadsPage';
 import { DownloadsSeriesPage } from './pages/DownloadsSeriesPage';
 import { WatchlistPage } from './pages/WatchlistPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { updateProvidersService } from './lib/services/UpdateProviders';
 
 function hexToRgb(hex: string) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -29,6 +30,9 @@ export default function App() {
   const { primary, themeBackground } = useThemeStore();
 
   useEffect(() => {
+    // Start auto provider updates on boot
+    updateProvidersService.startAutomaticUpdateCheck();
+
     // Apply background theme
     document.documentElement.setAttribute('data-theme', themeBackground);
 
