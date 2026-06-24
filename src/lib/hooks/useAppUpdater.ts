@@ -51,7 +51,16 @@ export const checkAppUpdates = async (manual = false) => {
     const userAgent = navigator.userAgent.toLowerCase();
 
     let platformExt = '';
-    if (userAgent.includes('windows') || userAgent.includes('win32')) {
+    if (userAgent.includes('android')) {
+      const wantToUpdate = await ask(
+        `Version ${latestVersion} is available! Would you like to go to the download page to get the new APK?`,
+        { title: 'Vega App Update', kind: 'info' }
+      );
+      if (wantToUpdate) {
+        openUrl(release.html_url);
+      }
+      return;
+    } else if (userAgent.includes('windows') || userAgent.includes('win32')) {
       platformExt = '.exe';
     } else if (userAgent.includes('macintosh') || userAgent.includes('mac os')) {
       platformExt = '.dmg';
@@ -124,6 +133,8 @@ export const useAppUpdater = () => {
   useEffect(() => {
     // @ts-ignore - Tauri injects this globally
     if (!window.__TAURI_INTERNALS__) return;
+
+    if (!settingsStorage.isAutoCheckUpdateEnabled()) return;
 
     // Run after a short delay so we don't slow down initial render
     const timer = setTimeout(() => {

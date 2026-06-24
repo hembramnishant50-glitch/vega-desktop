@@ -10,12 +10,14 @@ export const PreferencesSettings: React.FC = () => {
   const [downloadLocation, setDownloadLocation] = useState<string>('vega');
   const [excludedQualities, setExcludedQualities] = useState<string[]>([]);
   const [autoInstallUpdates, setAutoInstallUpdates] = useState<boolean>(true);
+  const [autoCheckUpdates, setAutoCheckUpdates] = useState<boolean>(true);
   const [tvModeEnabled, setTvModeEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     setDownloadLocation(settingsStorage.getDownloadLocation());
     setExcludedQualities(settingsStorage.getExcludedQualities());
     setAutoInstallUpdates(settingsStorage.isAutoDownloadEnabled());
+    setAutoCheckUpdates(settingsStorage.isAutoCheckUpdateEnabled());
     setTvModeEnabled(settingsStorage.isTvModeEnabled());
   }, []);
 
@@ -52,6 +54,12 @@ export const PreferencesSettings: React.FC = () => {
     const nextState = !autoInstallUpdates;
     setAutoInstallUpdates(nextState);
     settingsStorage.setAutoDownloadEnabled(nextState);
+  };
+
+  const handleToggleAutoCheck = () => {
+    const nextState = !autoCheckUpdates;
+    setAutoCheckUpdates(nextState);
+    settingsStorage.setAutoCheckUpdateEnabled(nextState);
   };
 
   const handleToggleTvMode = () => {
@@ -108,6 +116,22 @@ export const PreferencesSettings: React.FC = () => {
           onClick={handleToggleAutoInstall}
         >
           {autoInstallUpdates ? 'ON' : 'OFF'}
+        </FocusableButton>
+      </div>
+
+      <div className="settings-divider" />
+
+      {/* Auto Check Updates */}
+      <div className="settings-row">
+        <div className="settings-info">
+          <h3 className="label-lg">Auto Check for Updates</h3>
+          <p className="body-md text-muted">Check for updates on app startup</p>
+        </div>
+        <FocusableButton 
+          className={`theme-toggle-btn ${autoCheckUpdates ? 'active' : ''}`}
+          onClick={handleToggleAutoCheck}
+        >
+          {autoCheckUpdates ? 'ON' : 'OFF'}
         </FocusableButton>
       </div>
 
