@@ -126,9 +126,7 @@ export class SettingsStorage {
 
   // Update settings
   isAutoCheckUpdateEnabled(): boolean {
-    return mainStorage.getBool(SettingsKeys.AUTO_CHECK_UPDATE) === null
-      ? true
-      : mainStorage.getBool(SettingsKeys.AUTO_CHECK_UPDATE);
+    return mainStorage.getBool(SettingsKeys.AUTO_CHECK_UPDATE, true);
   }
 
   setAutoCheckUpdateEnabled(enabled: boolean): void {
@@ -136,8 +134,7 @@ export class SettingsStorage {
   }
 
   isAutoDownloadEnabled(): boolean {
-    const val = mainStorage.getBool(SettingsKeys.AUTO_DOWNLOAD);
-    return val === null ? true : val;
+    return mainStorage.getBool(SettingsKeys.AUTO_DOWNLOAD, true);
   }
 
   setAutoDownloadEnabled(enabled: boolean): void {
