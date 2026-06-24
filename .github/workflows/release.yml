@@ -124,9 +124,13 @@ jobs:
           # 5. Sign it
           $BUILD_TOOLS/apksigner sign --ks release.jks --ks-key-alias "$KEY_ALIAS" --ks-pass pass:"$KEYSTORE_PASSWORD" --key-pass pass:"$KEY_PASSWORD" --out vega-tv-android.apk app-aligned.apk
 
+      - name: Get version
+        run: echo "APP_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
       - name: Upload APK to Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: app-v${{ env.APP_VERSION }}
           files: vega-tv-android.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
