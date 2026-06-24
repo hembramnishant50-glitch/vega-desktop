@@ -111,12 +111,15 @@ jobs:
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         id: sign_app
+        env:
+          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
         with:
           releaseDirectory: android-release-apk
           signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: 34.0.0
 
       - name: Rename APK
         run: |
