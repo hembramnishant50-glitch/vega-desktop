@@ -9,7 +9,6 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_http::init())
@@ -20,6 +19,7 @@ pub fn run() {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
         builder = builder
+            .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(tauri_plugin_window_state::Builder::new().build())
             .plugin(tauri_plugin_libmpv::init());
     }
