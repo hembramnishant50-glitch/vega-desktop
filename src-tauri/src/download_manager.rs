@@ -1,15 +1,15 @@
-use serde::{Serialize};
+use futures_util::StreamExt;
+use reqwest::header::RANGE;
+use reqwest::Client;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, State};
-use tokio::sync::Mutex;
 use tokio::sync::mpsc::{self, Sender};
-use futures_util::StreamExt;
-use reqwest::header::RANGE;
-use reqwest::Client;
+use tokio::sync::Mutex;
 
 #[derive(Clone, Serialize)]
 pub struct ProgressPayload {
@@ -88,7 +88,7 @@ pub async fn start_download(
     }
 
     let (cancel_tx, mut cancel_rx) = mpsc::channel::<()>(1);
-    
+
     {
         let mut active = state.active_downloads.lock().await;
         active.insert(id.clone(), cancel_tx);
@@ -109,19 +109,23 @@ pub async fn start_download(
 
         let chunk = chunk.map_err(|e| e.to_string())?;
         dest.write_all(&chunk).map_err(|e| e.to_string())?;
-        
+
         let chunk_len = chunk.len() as u64;
         downloaded += chunk_len;
         bytes_since_last_speed_check += chunk_len;
 
         if last_emit.elapsed().as_millis() > 500 {
-            let speed = (bytes_since_last_speed_check as f64 / speed_tracker.elapsed().as_secs_f64()) as u64;
-            let _ = app.emit("download-progress", ProgressPayload {
-                id: id.clone(),
-                downloaded,
-                total: total_size,
-                speed,
-            });
+            let speed = (bytes_since_last_speed_check as f64
+                / speed_tracker.elapsed().as_secs_f64()) as u64;
+            let _ = app.emit(
+                "download-progress",
+                ProgressPayload {
+                    id: id.clone(),
+                    downloaded,
+                    total: total_size,
+                    speed,
+                },
+            );
 
             last_emit = std::time::Instant::now();
             speed_tracker = std::time::Instant::now();
@@ -134,7 +138,7 @@ pub async fn start_download(
         let mut active = state.active_downloads.lock().await;
         active.remove(&id);
     }
-    
+
     // Rename .part to final
     std::fs::rename(&part_path, &path).map_err(|e| e.to_string())?;
 
@@ -153,13 +157,17 @@ pub async fn pause_download(state: State<'_, DownloadState>, id: String) -> Resu
 }
 
 #[tauri::command]
-pub async fn cancel_download(state: State<'_, DownloadState>, id: String, file_path: String) -> Result<(), String> {
+pub async fn cancel_download(
+    state: State<'_, DownloadState>,
+    id: String,
+    file_path: String,
+) -> Result<(), String> {
     // First pause it
     let mut active = state.active_downloads.lock().await;
     if let Some(tx) = active.remove(&id) {
         let _ = tx.send(()).await;
     }
-    
+
     // Then delete the partial file
     let path = PathBuf::from(&file_path);
     let part_path = path.with_extension("part");
@@ -169,6 +177,6 @@ pub async fn cancel_download(state: State<'_, DownloadState>, id: String, file_p
     if path.exists() {
         let _ = std::fs::remove_file(path);
     }
-    
+
     Ok(())
 }

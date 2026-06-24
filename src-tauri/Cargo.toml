@@ -1,6 +1,6 @@
 [package]
 name = "vega-app"
-version = "1.2.0"
+version = "1.2.1"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -43,3 +43,4 @@ strip = true
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-window-state = "2"
 tauri-plugin-libmpv = "0.3.2"
+tauri-plugin-updater = "2"
