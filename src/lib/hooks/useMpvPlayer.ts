@@ -61,6 +61,7 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
   const unlistenEventsRef = useRef<(() => void) | null>(null);
   const pendingSubsRef = useRef<{url?: string, uri?: string, language?: string, title?: string}[]>([]);
   const optsRef = useRef(opts);
+  const initCounterRef = useRef(0);
   optsRef.current = opts;
 
   // ... fetchTracks is unchanged ...
@@ -104,6 +105,9 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
 
   const initPlayer = useCallback(async () => {
     activeInstances++;
+    initCounterRef.current++;
+    const currentInit = initCounterRef.current;
+
     if (globalDestroyTimer) {
       clearTimeout(globalDestroyTimer);
       globalDestroyTimer = null;
@@ -142,6 +146,8 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
 
     await globalInitPromise;
 
+    if (currentInit !== initCounterRef.current) return;
+
     try {
       const unlisten = await observeProperties(
         OBSERVED_PROPERTIES,
@@ -177,6 +183,11 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
           }
         }
       );
+      
+      if (currentInit !== initCounterRef.current) {
+        unlisten();
+        return;
+      }
       unlistenPropsRef.current = unlisten;
 
       const unlistenEvt = await listenEvents((event) => {
@@ -214,6 +225,11 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
           setIsBuffering(false);
         }
       });
+      
+      if (currentInit !== initCounterRef.current) {
+        unlistenEvt();
+        return;
+      }
       unlistenEventsRef.current = unlistenEvt;
 
       setIsInitialized(true);
@@ -224,6 +240,7 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
   }, [fetchTracks]);
 
   const destroyPlayer = useCallback(() => {
+    initCounterRef.current++;
     activeInstances--;
     unlistenPropsRef.current?.();
     unlistenEventsRef.current?.();

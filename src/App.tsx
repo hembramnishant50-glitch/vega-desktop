@@ -10,26 +10,40 @@ import { SearchPage } from './pages/SearchPage';
 import { PlayerPage } from './pages/PlayerPage';
 import { WafDialog } from './components/WafDialog';
 import useThemeStore from './lib/zustand/themeStore';
-
-import { initDownloadListeners } from './lib/zustand/downloadStore';
+import { settingsStorage } from './lib/storage';
 import { useAppUpdater } from './lib/hooks/useAppUpdater';
-
+import { initDownloadListeners } from './lib/zustand/downloadStore';
 import { DownloadsPage } from './pages/DownloadsPage';
 import { DownloadsSeriesPage } from './pages/DownloadsSeriesPage';
 import { WatchlistPage } from './pages/WatchlistPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { updateProvidersService } from './lib/services/UpdateProviders';
+import { init as initNavigation } from '@noriginmedia/norigin-spatial-navigation-core';
 
 function hexToRgb(hex: string) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 178, 190';
 }
 
+let isNavInitialized = false;
+
 export default function App() {
   initDownloadListeners();
   useAppUpdater();
 
   const { primary, themeBackground } = useThemeStore();
+  const tvMode = settingsStorage.isTvModeEnabled();
+
+  useEffect(() => {
+    if (tvMode && !isNavInitialized) {
+      initNavigation({
+        debug: false,
+        visualDebug: false,
+        distanceCalculationMethod: 'corners',
+      });
+      isNavInitialized = true;
+    }
+  }, [tvMode]);
 
   useEffect(() => {
     // Start auto provider updates on boot

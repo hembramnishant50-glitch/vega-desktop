@@ -1,17 +1,10 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../../lib/storage';
+import { PostCardItem, Post } from './PostCardItem';
 import './ContentSlider.css';
-
-interface Post {
-  title: string;
-  image: string;
-  link: string;
-  progress?: number; // Optional progress percentage (0-1)
-  providerValue?: string;
-  type?: string;
-  episodeTitle?: string;
-}
 
 interface ContentSliderProps {
   title: string;
@@ -24,6 +17,12 @@ interface ContentSliderProps {
 export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLoading, providerValue, onRemove }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const tvMode = settingsStorage.isTvModeEnabled();
+
+  const { ref: focusRef, focusKey, hasFocusedChild } = useFocusable({
+    focusable: tvMode,
+    trackChildren: true
+  });
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -49,8 +48,13 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
     }
 
     let url = `/content/${encodeURIComponent(post.link)}`;
-    if (finalProvider) {
-      url += `?provider=${encodeURIComponent(finalProvider)}`;
+    const params = new URLSearchParams();
+    if (finalProvider) params.append('provider', finalProvider);
+    if (post.image) params.append('poster', post.image);
+    
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
     }
     navigate(url);
   };
@@ -73,66 +77,40 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
   }
 
   return (
-    <div className="slider-container">
-      <h2 className="slider-title headline-md">{title}</h2>
-      
-      <div className="slider-wrapper">
-        <button 
-          className="slider-arrow left glass-overlay" 
-          onClick={() => handleScroll('left')}
-          aria-label="Scroll left"
-        >
-          <ChevronLeft size={32} />
-        </button>
+    <FocusContext.Provider value={focusKey}>
+      <div className={`slider-container ${hasFocusedChild ? 'has-focused-child' : ''}`} ref={focusRef as any}>
+        <h2 className="slider-title headline-md">{title}</h2>
+        
+        <div className="slider-wrapper">
+          <button 
+            className="slider-arrow left glass-overlay" 
+            onClick={() => handleScroll('left')}
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={32} />
+          </button>
 
-        <div className="slider-row" ref={scrollRef}>
-          {posts.map((post, index) => (
-            <div 
-              key={`${post.link}-${index}`}
-              className="post-card"
-              onClick={() => handlePostClick(post)}
-            >
-              <div className="post-image-container">
-                <img 
-                  src={post.image} 
-                  alt={post.title} 
-                  className="post-image"
-                  loading="lazy"
-                />
-                <div className="post-hover-overlay">
-                  <Play size={48} fill="currentColor" />
-                </div>
-                {onRemove && (
-                  <button 
-                    className="post-remove-btn" 
-                    onClick={(e) => onRemove(post, e)}
-                    title="Remove from history"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
-                {post.progress !== undefined && (
-                  <div className="post-progress-bar-container">
-                    <div 
-                      className="post-progress-bar-fill"
-                      style={{ width: `${post.progress * 100}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-              <h3 className="post-title label-md">{post.title}</h3>
-            </div>
-          ))}
+          <div className="slider-row" ref={scrollRef}>
+            {posts.map((post, index) => (
+              <PostCardItem 
+                key={`${post.link}-${index}`} 
+                post={post} 
+                onClick={handlePostClick} 
+                onRemove={onRemove} 
+              />
+            ))}
+          </div>
+
+          <button 
+            className="slider-arrow right glass-overlay" 
+            onClick={() => handleScroll('right')}
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={32} />
+          </button>
         </div>
-
-        <button 
-          className="slider-arrow right glass-overlay" 
-          onClick={() => handleScroll('right')}
-          aria-label="Scroll right"
-        >
-          <ChevronRight size={32} />
-        </button>
       </div>
-    </div>
+    </FocusContext.Provider>
   );
 };
+

@@ -11,7 +11,42 @@ import { DownloadServerDialog } from '../components/DownloadServerDialog';
 import { CustomSelect } from '../components/CustomSelect';
 import { Link, Stream } from '../lib/providers/types';
 import { settingsStorage } from '../lib/storage/SettingsStorage';
+import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
 import './MetaPage.css';
+
+import { FocusableButton } from '../components/layout/FocusableButton';
+
+const FocusableEpisodeCard: React.FC<{
+  onClick: () => void;
+  children: React.ReactNode[];
+}> = ({ onClick, children }) => {
+  return (
+    <div className={`episode-card glass-overlay`} style={{ padding: 0, display: 'flex' }}>
+      <FocusableButton 
+        onClick={onClick} 
+        className="episode-main-clickable" 
+        style={{ 
+          flex: 1, 
+          display: 'flex', 
+          alignItems: 'center', 
+          padding: '16px', 
+          gap: '16px', 
+          background: 'transparent', 
+          border: 'none', 
+          textAlign: 'left', 
+          color: 'inherit',
+          borderRadius: 'var(--rounded-lg)'
+        }}
+      >
+        {children[0]}
+        {children[1]}
+      </FocusableButton>
+      <div style={{ display: 'flex', alignItems: 'center', paddingRight: '16px' }}>
+        {children[2]}
+      </div>
+    </div>
+  );
+};
 
 const DownloadActionButton = ({
   id,
@@ -29,19 +64,24 @@ const DownloadActionButton = ({
 
   if (isExtracting) {
     return (
-      <button className="icon-btn opacity-50 cursor-not-allowed" disabled title="Extracting links...">
+      <FocusableButton 
+        className="icon-btn opacity-50 cursor-not-allowed" 
+        disabled 
+        title="Extracting links..."
+        onClick={(e: any) => e.stopPropagation?.()}
+      >
         <Loader2 size={20} className="animate-spin text-primary" />
-      </button>
+      </FocusableButton>
     );
   }
 
   if (downloadState) {
     if (downloadState.status === 'completed') {
       return (
-        <button 
+        <FocusableButton 
           className="icon-btn" 
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(e: any) => {
+            e.stopPropagation?.();
             if (window.confirm('Are you sure you want to delete this download?')) {
               onDeleteClick(id);
             }
@@ -49,17 +89,17 @@ const DownloadActionButton = ({
           title="Delete Download"
         >
           <Trash2 size={20} className="text-primary" />
-        </button>
+        </FocusableButton>
       );
     } else if (['downloading', 'queued', 'paused'].includes(downloadState.status)) {
       const progress = downloadState.totalBytes > 0 
         ? Math.round((downloadState.downloadedBytes / downloadState.totalBytes) * 100) 
         : 0;
       return (
-        <button 
+        <FocusableButton 
           className="icon-btn" 
           title={`Downloading: ${progress}%`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e: any) => e.stopPropagation?.()}
           style={{ cursor: 'default' }}
         >
           <div style={{
@@ -70,31 +110,35 @@ const DownloadActionButton = ({
             border: '2px solid var(--surface-variant)',
             display: 'inline-block'
           }} />
-        </button>
+        </FocusableButton>
       );
     } else if (downloadState.status === 'error') {
       return (
-        <button className="icon-btn" onClick={(e) => {
-          e.stopPropagation();
-          onDownloadClick(ep, idx, type, seasonTitle);
-        }} title="Retry Download">
-          <Download size={20} className="text-primary" />
-        </button>
+        <FocusableButton 
+          className="icon-btn" 
+          onClick={(e: any) => {
+            e.stopPropagation?.();
+            onDownloadClick(ep, idx, type, seasonTitle, id);
+          }} 
+          title="Retry Download"
+        >
+          <Download size={20} className="text-red-500" />
+        </FocusableButton>
       );
     }
   }
 
   return (
-    <button
+    <FocusableButton
       className="icon-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        onDownloadClick(ep, idx, type, seasonTitle);
+      onClick={(e: any) => {
+        e.stopPropagation?.();
+        onDownloadClick(ep, idx, type, seasonTitle, id);
       }}
       title="Download"
     >
       <Download size={20} className="text-primary" />
-    </button>
+    </FocusableButton>
   );
 };
 
@@ -106,6 +150,12 @@ export const MetaPage: React.FC = () => {
   const { provider } = useContentStore();
   const { addDownload, downloads, cancelDownload } = useDownloadStore();
   const { watchList, addItem, removeItem } = useWatchListStore();
+  const tvMode = settingsStorage.isTvModeEnabled();
+
+  const { ref: focusRef, focusKey } = useFocusable({
+    focusable: tvMode,
+    trackChildren: true,
+  });
 
   const link = decodeURIComponent(url || '');
   const urlProvider = searchParams.get('provider');
@@ -167,7 +217,8 @@ export const MetaPage: React.FC = () => {
   );
 
   const bgImage = useMemo(() => meta?.background || info?.image, [meta, info]);
-  const posterImage = useMemo(() => meta?.poster || info?.image, [meta, info]);
+  const urlPoster = searchParams.get('poster');
+  const posterImage = useMemo(() => meta?.poster || info?.image || urlPoster, [meta, info, urlPoster]);
   const title = useMemo(() => meta?.name || info?.title, [meta, info]);
   const description = useMemo(() => meta?.description || info?.synopsis || info?.description, [meta, info]);
   const year = useMemo(() => meta?.year || info?.year, [meta, info]);
@@ -189,13 +240,13 @@ export const MetaPage: React.FC = () => {
     }
   };
 
-  if (isLoading && !info) {
+  if (isLoading) {
     return (
       <div className="meta-page skeleton-page">
         <div className="meta-header" style={{ width: 'calc(100% - 32px)', display: 'flex', justifyContent: 'space-between' }}>
-          <button className="icon-btn back-btn glass-overlay" onClick={() => navigate(-1)}>
+          <FocusableButton className="icon-btn back-btn glass-overlay" onClick={() => navigate(-1)}>
             <ArrowLeft size={24} />
-          </button>
+          </FocusableButton>
         </div>
         <div className="meta-hero-bg-container">
           <div className="meta-hero-bg skeleton-bg" />
@@ -242,7 +293,7 @@ export const MetaPage: React.FC = () => {
       state: {
         episodeList: episodeData,
         linkIndex,
-        primaryTitle: title || info?.title || '',
+        primaryTitle: meta?.name || meta?.title || info?.title || '',
         secondaryTitle: activeSeason?.title || '',
         type,
         poster: {
@@ -256,13 +307,13 @@ export const MetaPage: React.FC = () => {
     });
   };
 
-  const handleDownloadClick = async (ep: { title: string, link: string }, idx: number, type: string, seasonTitle?: string) => {
+  const handleDownloadClick = async (ep: { title: string, link: string }, idx: number, type: string, seasonTitle?: string, exactId?: string) => {
     try {
       const baseTitle = meta?.name || meta?.title || info?.title || 'Unknown Title';
 
-      const id = seasonTitle
+      const id = exactId || (seasonTitle
         ? `${baseTitle}_S${seasonTitle}_E${idx + 1}`
-        : `${baseTitle}_direct_${idx}`;
+        : `${baseTitle}_direct_${idx}`);
 
       setDownloadingId(id);
 
@@ -323,18 +374,19 @@ export const MetaPage: React.FC = () => {
 
 
   return (
-    <div className="meta-page">
-      <div className="meta-header" style={{ width: 'calc(100% - 32px)', display: 'flex', justifyContent: 'space-between' }}>
-        <button className="icon-btn back-btn glass-overlay" onClick={() => navigate(-1)}>
-          <ArrowLeft size={24} />
-        </button>
-      </div>
+    <FocusContext.Provider value={focusKey}>
+      <div className="meta-page" ref={focusRef as any}>
+        <div className="meta-header" style={{ width: 'calc(100% - 32px)', display: 'flex', justifyContent: 'space-between' }}>
+          <FocusableButton className="icon-btn back-btn glass-overlay" onClick={() => navigate(-1)}>
+            <ArrowLeft size={24} />
+          </FocusableButton>
+        </div>
 
       {/* Fixed Background Image */}
       <div className="meta-hero-bg-container">
         <div
           className="meta-hero-bg"
-          style={{ backgroundImage: `url(${bgImage})` }}
+          style={bgImage ? { backgroundImage: `url(${bgImage})` } : {}}
         />
       </div>
 
@@ -358,7 +410,7 @@ export const MetaPage: React.FC = () => {
             </div>
 
             <div className="meta-actions" style={{ marginBottom: '16px' }}>
-              <button 
+              <FocusableButton 
                 className="icon-btn glass-overlay" 
                 onClick={toggleWatchList}
                 title={isInWatchList ? "Remove from Watchlist" : "Add to Watchlist"}
@@ -374,7 +426,7 @@ export const MetaPage: React.FC = () => {
                 }}
               >
                 {isInWatchList ? <BookmarkCheck size={24} /> : <BookmarkPlus size={24} />}
-              </button>
+              </FocusableButton>
             </div>
           </div>
         </div>
@@ -447,9 +499,8 @@ export const MetaPage: React.FC = () => {
               {activeSeason?.episodesLink && !episodeLoading && episodeList && episodeList.length > 0 && (
                 <div className="episodes-list">
                   {episodeList.map((ep, idx) => (
-                    <div
+                    <FocusableEpisodeCard
                       key={ep.link || idx}
-                      className="episode-card glass-overlay"
                       onClick={() => handlePlayClick(episodeList, idx, 'series')}
                     >
                       <div className="episode-number">{idx + 1}</div>
@@ -469,7 +520,7 @@ export const MetaPage: React.FC = () => {
                           onDeleteClick={cancelDownload}
                         />
                       </div>
-                    </div>
+                    </FocusableEpisodeCard>
                   ))}
                 </div>
               )}
@@ -478,9 +529,8 @@ export const MetaPage: React.FC = () => {
               {activeSeason?.directLinks && activeSeason.directLinks.length > 0 && (
                 <div className="episodes-list">
                   {activeSeason.directLinks.map((link, idx) => (
-                    <div
+                    <FocusableEpisodeCard
                       key={link.link || idx}
-                      className="episode-card glass-overlay"
                       onClick={() => handlePlayClick(activeSeason.directLinks!, idx, link.type || 'movie')}
                     >
                       <div className="episode-number">
@@ -502,7 +552,7 @@ export const MetaPage: React.FC = () => {
                           onDeleteClick={cancelDownload}
                         />
                       </div>
-                    </div>
+                    </FocusableEpisodeCard>
                   ))}
                 </div>
               )}
@@ -526,5 +576,6 @@ export const MetaPage: React.FC = () => {
         onSelect={handleStreamSelected}
       />
     </div>
+    </FocusContext.Provider>
   );
 };

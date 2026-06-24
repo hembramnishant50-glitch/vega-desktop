@@ -5,12 +5,16 @@ import { Monitor, Check, Code } from "lucide-react";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
 import { checkAppUpdates } from '../lib/hooks/useAppUpdater';
+import { FocusableButton } from '../components/layout/FocusableButton';
+
 import "./SettingsPage.css";
 
 export const SettingsPage: React.FC = () => {
   const { primary, themeBackground, setPrimary, setThemeBackground } =
     useThemeStore();
   const [appVersion, setAppVersion] = React.useState("Loading...");
+
+
 
   React.useEffect(() => {
     import("@tauri-apps/api/app")
@@ -21,14 +25,14 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="settings-page">
-      <div className="settings-header">
+      <div className="page-header">
         <h1 className="headline-lg">Settings</h1>
       </div>
 
       <div className="settings-content">
         {/* Appearance Group */}
         <section className="settings-group">
-          <h2 className="title-md mb-sm flex items-center gap-2">
+          <h2 className="title-md flex items-center gap-2" style={{ marginBottom: '8px' }}>
             <Monitor size={20} /> Appearance
           </h2>
           <div className="settings-card">
@@ -41,24 +45,18 @@ export const SettingsPage: React.FC = () => {
                 </p>
               </div>
               <div className="theme-toggle-group">
-                <button
+                <FocusableButton
                   className={`theme-toggle-btn ${themeBackground === "oled" ? "active" : ""}`}
                   onClick={() => setThemeBackground("oled")}
                 >
                   Black
-                </button>
-                <button
+                </FocusableButton>
+                <FocusableButton
                   className={`theme-toggle-btn ${themeBackground === "gray" ? "active" : ""}`}
                   onClick={() => setThemeBackground("gray")}
                 >
                   Gray
-                </button>
-                {/* <button 
-                  className={`theme-toggle-btn ${themeBackground === 'white' ? 'active' : ''}`}
-                  onClick={() => setThemeBackground('white')}
-                >
-                  White
-                </button> */}
+                </FocusableButton>
               </div>
             </div>
 
@@ -77,7 +75,7 @@ export const SettingsPage: React.FC = () => {
                   const isMatch =
                     primary?.toLowerCase() === t.color?.toLowerCase();
                   return (
-                    <button
+                    <FocusableButton
                       key={t.name}
                       className={`accent-color-btn ${isMatch ? "active" : ""}`}
                       style={{ backgroundColor: t.color }}
@@ -91,7 +89,7 @@ export const SettingsPage: React.FC = () => {
                           color={t.color === "#FFFFFF" ? "#000" : "#FFF"}
                         />
                       )}
-                    </button>
+                    </FocusableButton>
                   );
                 })}
               </div>
@@ -101,7 +99,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Preferences Group */}
         <section className="settings-group">
-          <h2 className="title-md mb-sm flex items-center gap-2">
+          <h2 className="title-md flex items-center gap-2" style={{ marginBottom: '8px' }}>
             Preferences
           </h2>
           <div className="settings-card">
@@ -111,7 +109,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Subtitles Group */}
         <section className="settings-group">
-          <h2 className="title-md mb-sm flex items-center gap-2">Subtitles</h2>
+          <h2 className="title-md flex items-center gap-2" style={{ marginBottom: '8px' }}>Subtitles</h2>
           <div className="settings-card">
             <SubtitleSettings />
           </div>
@@ -119,29 +117,32 @@ export const SettingsPage: React.FC = () => {
 
         {/* About Group */}
         <section className="settings-group">
-          <h2 className="title-md mb-sm">About</h2>
+          <h2 className="title-md" style={{ marginBottom: '8px' }}>About</h2>
           <div className="settings-card">
             <div className="settings-row">
               <div className="settings-info">
                 <h3 className="label-lg">Vega Desktop</h3>
                 <p className="body-md text-muted">{appVersion}</p>
-                <button 
-                  className="theme-toggle-btn active mt-sm"
+                <FocusableButton
+                  className="theme-toggle-btn active"
                   onClick={() => checkAppUpdates(true)}
                   style={{ width: 'fit-content', padding: '6px 12px', marginTop: '8px' }}
                 >
                   Check for Updates
-                </button>
+                </FocusableButton>
               </div>
-              <div className="flex gap-3">
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <a
                   href={socialLinks.github}
                   target="_blank"
                   rel="noreferrer"
                   className="social-btn"
                   title="GitHub"
+                  tabIndex={-1}
                 >
-                  <Code size={20} />
+                  <FocusableButton className="social-btn">
+                    <Code size={20} />
+                  </FocusableButton>
                 </a>
               </div>
             </div>

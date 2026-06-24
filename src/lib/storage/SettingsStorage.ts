@@ -11,6 +11,7 @@ export enum SettingsKeys {
   THEME_BACKGROUND = 'themeBackground',
   SHOW_TAB_BAR_LABELS = 'showTabBarLabels',
   CUSTOM_COLOR = 'customColor',
+  TV_MODE_ENABLED = 'tvModeEnabled',
   // Feedback settings
   HAPTIC_FEEDBACK = 'hapticFeedback',
   NOTIFICATIONS_ENABLED = 'notificationsEnabled',
@@ -91,6 +92,17 @@ export class SettingsStorage {
 
   setShowTabBarLabels(show: boolean): void {
     mainStorage.setBool(SettingsKeys.SHOW_TAB_BAR_LABELS, show);
+  }
+
+  isTvModeEnabled(): boolean {
+    const defaultTvMode = import.meta.env.VITE_TV_MODE === 'true';
+    return mainStorage.getBool(SettingsKeys.TV_MODE_ENABLED) === null
+      ? defaultTvMode
+      : mainStorage.getBool(SettingsKeys.TV_MODE_ENABLED);
+  }
+
+  setTvModeEnabled(enabled: boolean): void {
+    mainStorage.setBool(SettingsKeys.TV_MODE_ENABLED, enabled);
   }
 
   isHapticFeedbackEnabled(): boolean {

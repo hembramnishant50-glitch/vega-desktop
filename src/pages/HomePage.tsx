@@ -7,6 +7,7 @@ import { Hero } from '../components/home/Hero';
 import { ContentSlider } from '../components/home/ContentSlider';
 import { RefreshCw, Play, Loader2 } from 'lucide-react';
 import useWatchHistoryStore from '../lib/zustand/watchHistrory';
+import { FocusableButton } from '../components/layout/FocusableButton';
 import './HomePage.css';
 import '../pages/SearchPage.css';
 
@@ -101,10 +102,16 @@ export const HomePage: React.FC = () => {
         {!isSearchLoading && !searchError && searchResults && searchResults.length > 0 && (
           <div className="search-grid pb-xl">
             {searchResults.map((post, index) => (
-              <div 
+              <FocusableButton 
                 key={`${post.link}-${index}`} 
                 className="search-card"
-                onClick={() => navigate(`/content/${encodeURIComponent(post.link)}?provider=${encodeURIComponent(provider?.value || '')}`)}
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (provider?.value) params.append('provider', provider.value);
+                  if (post.image) params.append('poster', post.image);
+                  navigate(`/content/${encodeURIComponent(post.link)}?${params.toString()}`);
+                }}
+                style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0 }}
               >
                 <div className="search-poster-container">
                   <img src={post.image} alt={post.title} className="search-poster" loading="lazy" />
@@ -113,7 +120,7 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
                 <h3 className="search-title label-md">{post.title}</h3>
-              </div>
+              </FocusableButton>
             ))}
           </div>
         )}
@@ -126,10 +133,10 @@ export const HomePage: React.FC = () => {
       <div className="error-state">
         <h2 className="headline-md">Failed to load content</h2>
         <p className="body-md text-muted mb-md">{homeError.message}</p>
-        <button className="btn-primary" onClick={() => refetch()} disabled={isRefetching}>
+        <FocusableButton className="btn-primary" onClick={() => refetch()} disabled={isRefetching}>
           <RefreshCw className={isRefetching ? 'spin' : ''} />
           Retry
-        </button>
+        </FocusableButton>
       </div>
     );
   }

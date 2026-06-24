@@ -3,6 +3,8 @@ import { Play } from 'lucide-react';
 import { useHeroMetadata } from '../../lib/hooks/useHomePageData';
 import { useNavigate } from 'react-router-dom';
 import useContentStore from '../../lib/zustand/contentStore';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../../lib/storage';
 import './Hero.css';
 
 interface HeroProps {
@@ -16,11 +18,26 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ post }) => {
   const navigate = useNavigate();
   const { provider } = useContentStore();
+  const tvMode = settingsStorage.isTvModeEnabled();
 
   const { data: meta } = useHeroMetadata(
     post?.link || '',
     provider?.value || ''
   );
+
+  const handlePlayClick = () => {
+    if (post) {
+      navigate(`/content/${encodeURIComponent(post.link)}`);
+    }
+  };
+
+  const { ref: playRef, focused: playFocused } = useFocusable({
+    focusable: tvMode && !!post,
+    onEnterPress: handlePlayClick,
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
 
   if (!post) {
     return (
@@ -35,12 +52,6 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
   // Use logo if available, otherwise just text
   const logoUrl = meta?.logo;
   const description = meta?.description || meta?.plot || '';
-
-
-  const handlePlayClick = () => {
-    // For now, redirect to details page. Later it will directly play or show episodes.
-    navigate(`/content/${encodeURIComponent(post.link)}`);
-  };
 
   return (
     <div className="hero-container">
@@ -64,17 +75,18 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
         )}
 
         <div className="hero-actions">
-          <button className="btn-play" onClick={handlePlayClick}>
+          <button 
+            // @ts-ignore
+            ref={playRef}
+            className={`btn-play ${playFocused ? 'tv-focus' : ''}`} 
+            onClick={handlePlayClick}
+          >
             <Play size={24} fill="currentColor" />
             <span className="label-lg">Play</span>
           </button>
-
-          {/* <button className="btn-info glass-overlay" onClick={handleInfoClick}>
-            <Info size={24} />
-            <span className="label-lg">More Info</span>
-          </button> */}
         </div>
       </div>
     </div>
   );
 };
+

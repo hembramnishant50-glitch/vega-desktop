@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Play,
@@ -18,8 +18,8 @@ import {
   RectangleHorizontal,
   Check,
   Server as ServerIcon,
+  Tv,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import type { MpvTrack } from '../lib/hooks/useMpvPlayer';
 import { SearchSubtitlesModal } from '../components/SearchSubtitlesModal';
 
@@ -60,6 +60,8 @@ interface PlayerControlsProps {
   isPip: boolean;
   onToggleCrop: () => void;
   isCropped: boolean;
+  onPlayNative?: () => void;
+  isTV?: boolean;
 }
 
 function formatTime(seconds: number): string {
@@ -110,6 +112,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   isPip,
   onToggleCrop,
   isCropped,
+  onPlayNative,
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [openMenu, setOpenMenu] = useState<'audio' | 'subtitle' | 'speed' | 'quality' | 'server' | null>(null);
@@ -173,7 +176,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
         try {
           const { getCurrentWindow } = await import('@tauri-apps/api/window');
           getCurrentWindow().startDragging();
-        } catch (err) {}
+        } catch (err) { }
       }
     };
 
@@ -228,7 +231,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <SkipBack size={24} />
           </button>
         ) : <div style={{ width: 44 }} />}
-        
+
         <button className="center-btn" onClick={() => onSeekRelative(-10)}>
           <Rewind size={24} />
         </button>
@@ -242,7 +245,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <div className="loading-spinner" style={{ width: 28, height: 28, borderWidth: 2 }} />
           </div>
         )}
-        
+
         <button className="center-btn" onClick={() => onSeekRelative(10)}>
           <FastForward size={24} />
         </button>
@@ -269,7 +272,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'audio' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'audio')}>
                 <AudioIcon size={18} />
-                <span>{audioTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0,2) || 'EN'}</span>
+                <span>{audioTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0, 2) || 'EN'}</span>
               </button>
               {openMenu === 'audio' && (
                 <div className="inline-menu left wide" onClick={stop}>
@@ -290,7 +293,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'subtitle' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'subtitle')}>
                 <Subtitles size={18} />
-                <span>{subtitleTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0,2) || 'OFF'}</span>
+                <span>{subtitleTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0, 2) || 'OFF'}</span>
               </button>
               {openMenu === 'subtitle' && (
                 <div className="inline-menu left wide" onClick={stop}>
@@ -337,18 +340,24 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           </div>
 
           <div className="player-actions-right">
+            {onPlayNative && (
+              <button className="action-btn text-btn" onClick={onPlayNative}>
+                <Tv size={18} />
+                <span>Native</span>
+              </button>
+            )}
             {showNextEpisode && secondaryTitle && (
               <button className="next-episode-pill" onClick={onNextEpisode}>
                 <span>Next: {secondaryTitle}</span>
                 <NextIcon size={16} />
               </button>
             )}
-            
+
             <button className={`action-btn text-btn ${isPip ? 'active' : ''}`} onClick={onTogglePip}>
               <PictureInPicture size={18} />
               <span>PIP</span>
             </button>
-            
+
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'server' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'server')}>
                 <ServerIcon size={18} />
@@ -360,9 +369,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                     <div className="inline-menu-item">No alternative servers</div>
                   )}
                   {streamData?.map((s: any, idx: number) => (
-                    <button 
-                      key={idx} 
-                      className={`inline-menu-item ${(selectedStream?.link === s.link) ? 'selected' : ''}`} 
+                    <button
+                      key={idx}
+                      className={`inline-menu-item ${(selectedStream?.link === s.link) ? 'selected' : ''}`}
                       onClick={() => { onSelectStream && onSelectStream(s); setOpenMenu(null); }}
                     >
                       <div className="track-details">
@@ -418,14 +427,14 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                 {isCropped ? 'Crop' : 'Fit'}
               </span>
             </button>
-            
+
             <button className="action-btn text-btn" onClick={onToggleFullscreen}>
               {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
           </div>
         </div>
       </div>
-      
+
       {showOnlineSearch && (
         <SearchSubtitlesModal
           initialSearchQuery={primaryTitle}

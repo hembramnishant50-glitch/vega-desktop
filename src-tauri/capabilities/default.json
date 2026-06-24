@@ -44,6 +44,16 @@
         }
       ]
     },
-    "libmpv:default"
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "vega://*"
+        },
+        {
+          "url": "intent://*"
+        }
+      ]
+    }
   ]
 }

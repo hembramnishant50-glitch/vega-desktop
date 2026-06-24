@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { FocusableButton } from './layout/FocusableButton';
+import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../lib/storage';
 import './CustomSelect.css';
 
 interface Option {
@@ -40,9 +43,16 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     };
   }, []);
 
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref: focusRef, focusKey } = useFocusable({
+    focusable: tvMode && isOpen,
+    isFocusBoundary: true,
+    trackChildren: true,
+  });
+
   return (
     <div className={`custom-select-container ${className}`} ref={containerRef}>
-      <button
+      <FocusableButton
         type="button"
         className="custom-select-button glass-overlay"
         onClick={() => setIsOpen(!isOpen)}
@@ -55,26 +65,48 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         <span className="custom-select-icon">
           {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </span>
-      </button>
+      </FocusableButton>
 
       {isOpen && (
-        <ul className="custom-select-list glass-overlay" role="listbox">
-          {options.map((option) => (
-            <li
-              key={option.value}
-              className={`custom-select-option ${option.value === value ? 'selected' : ''}`}
-              role="option"
-              aria-selected={option.value === value}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </li>
-          ))}
-        </ul>
+        <FocusContext.Provider value={focusKey}>
+          <ul className="custom-select-list glass-overlay" role="listbox" ref={focusRef as any}>
+            {options.map((option) => (
+              <SelectOptionItem 
+                key={option.value}
+                option={option}
+                isSelected={option.value === value}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+              />
+            ))}
+          </ul>
+        </FocusContext.Provider>
       )}
     </div>
+  );
+};
+
+const SelectOptionItem: React.FC<{option: Option, isSelected: boolean, onClick: () => void}> = ({option, isSelected, onClick}) => {
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref, focused } = useFocusable({
+    focusable: tvMode,
+    onEnterPress: onClick,
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  return (
+    <li
+      ref={ref as any}
+      className={`custom-select-option ${isSelected ? 'selected' : ''} ${focused ? 'tv-focus' : ''}`}
+      role="option"
+      aria-selected={isSelected}
+      onClick={onClick}
+    >
+      {option.label}
+    </li>
   );
 };

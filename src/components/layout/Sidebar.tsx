@@ -1,43 +1,49 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { Home, Search, Bookmark, Settings, Blocks, Download } from 'lucide-react';
-// import logo from '../../assets/logo.png';
+import { FocusableNavLink } from './FocusableNavLink';
+import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../../lib/storage';
 import './Sidebar.css';
 
 export const Sidebar: React.FC = () => {
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref, focusKey } = useFocusable({
+    focusable: tvMode,
+    trackChildren: true,
+    preferredChildFocusKey: 'SIDEBAR_HOME',
+  });
+
   return (
-    <aside className="sidebar">
-      {/* <div className="sidebar-logo">
-        <img src={logo} alt="Vega Logo" className="logo-img" />
-      </div> */}
+    <FocusContext.Provider value={focusKey}>
+      <aside className="sidebar" ref={ref as any}>
+        <nav className="sidebar-nav">
+          <FocusableNavLink focusKey="SIDEBAR_HOME" to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Home">
+            <Home size={24} />
+          </FocusableNavLink>
 
-      <nav className="sidebar-nav">
-        <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Home">
-          <Home size={24} />
-        </NavLink>
+          <FocusableNavLink to="/search" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Search">
+            <Search size={24} />
+          </FocusableNavLink>
 
-        <NavLink to="/search" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Search">
-          <Search size={24} />
-        </NavLink>
+          <FocusableNavLink to="/watchlist" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Watchlist">
+            <Bookmark size={24} />
+          </FocusableNavLink>
 
-        <NavLink to="/watchlist" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Watchlist">
-          <Bookmark size={24} />
-        </NavLink>
+          <FocusableNavLink to="/downloads" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Downloads">
+            <Download size={24} />
+          </FocusableNavLink>
 
-        <NavLink to="/downloads" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Downloads">
-          <Download size={24} />
-        </NavLink>
+          <div className="nav-spacer" />
 
-        <div className="nav-spacer" />
+          <FocusableNavLink to="/extensions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Extensions">
+            <Blocks size={24} />
+          </FocusableNavLink>
 
-        <NavLink to="/extensions" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Extensions">
-          <Blocks size={24} />
-        </NavLink>
-
-        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Settings">
-          <Settings size={24} />
-        </NavLink>
-      </nav>
-    </aside>
+          <FocusableNavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Settings">
+            <Settings size={24} />
+          </FocusableNavLink>
+        </nav>
+      </aside>
+    </FocusContext.Provider>
   );
 };

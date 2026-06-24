@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { useDownloadStore, DownloadItem } from '../lib/zustand/downloadStore';
 import { Play, Pause, X, Trash2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { FocusableButton } from '../components/layout/FocusableButton';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../lib/storage';
 import './DownloadsPage.css';
 
 export const DownloadsPage = () => {
@@ -94,101 +97,123 @@ export const DownloadsPage = () => {
 
   return (
     <div className="downloads-page">
-      <div className="downloads-header">
-        <h1 className="headline-lg">Downloads</h1>
-      </div>
+        <div className="downloads-header">
+          <h1 className="headline-lg">Downloads</h1>
+        </div>
 
-      <div className="downloads-content">
-        {activeDownloads.length > 0 && (
-          <section className="downloads-section">
-            <h2 className="section-title">Active Downloads</h2>
-            <div className="active-downloads-list">
-              {activeDownloads.map(item => {
-                const progressPct = item.totalBytes > 0 
-                  ? Math.min(100, Math.round((item.downloadedBytes / item.totalBytes) * 100)) 
-                  : 0;
+        <div className="downloads-content">
+          {activeDownloads.length > 0 && (
+            <section className="downloads-section">
+              <h2 className="section-title">Active Downloads</h2>
+              <div className="active-downloads-list">
+                {activeDownloads.map(item => {
+                  const progressPct = item.totalBytes > 0 
+                    ? Math.min(100, Math.round((item.downloadedBytes / item.totalBytes) * 100)) 
+                    : 0;
 
-                return (
-                  <div key={item.id} className="active-download-card">
-                    <div className="card-poster" style={{ backgroundImage: `url(${item.poster || ''})` }}>
-                      {!item.poster && <div className="no-poster">N/A</div>}
-                    </div>
-                    <div className="card-info">
-                      <h3 className="title-truncate" title={item.episodeName || item.title}>
-                        {getCleanTitle(item)}
-                      </h3>
-                      <div className="progress-bar-container">
-                        <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+                  return (
+                    <div key={item.id} className="active-download-card">
+                      <div className="card-poster" style={{ backgroundImage: `url(${item.poster || ''})` }}>
+                        {!item.poster && <div className="no-poster">N/A</div>}
                       </div>
-                      <div className="download-meta">
-                        {item.status === 'error' ? (
-                          <span className="text-red-500 flex items-center gap-1"><AlertCircle size={14}/> Error</span>
-                        ) : item.status === 'paused' ? (
-                          <span className="text-yellow-500">Paused</span>
-                        ) : (
-                          <span>
-                            {formatBytes(item.downloadedBytes)} / {formatBytes(item.totalBytes)}
-                            <span className="speed-badge">{formatBytes(item.speed)}/s</span>
-                          </span>
+                      <div className="card-info">
+                        <h3 className="title-truncate" title={item.episodeName || item.title}>
+                          {getCleanTitle(item)}
+                        </h3>
+                        <div className="progress-bar-container">
+                          <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
+                        </div>
+                        <div className="download-meta">
+                          {item.status === 'error' ? (
+                            <span className="text-red-500 flex items-center gap-1"><AlertCircle size={14}/> Error</span>
+                          ) : item.status === 'paused' ? (
+                            <span className="text-yellow-500">Paused</span>
+                          ) : (
+                            <span>
+                              {formatBytes(item.downloadedBytes)} / {formatBytes(item.totalBytes)}
+                              <span className="speed-badge">{formatBytes(item.speed)}/s</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="card-actions">
+                        {item.status === 'downloading' && (
+                          <FocusableButton className="action-btn pause" onClick={() => pauseDownload(item.id)}>
+                            <Pause size={20} />
+                          </FocusableButton>
                         )}
+                        {(item.status === 'paused' || item.status === 'error') && (
+                          <FocusableButton className="action-btn play" onClick={() => resumeDownload(item.id)}>
+                            <Play size={20} />
+                          </FocusableButton>
+                        )}
+                        <FocusableButton className="action-btn cancel" onClick={() => cancelDownload(item.id)}>
+                          <X size={20} />
+                        </FocusableButton>
                       </div>
                     </div>
-                    <div className="card-actions">
-                      {item.status === 'downloading' && (
-                        <button className="action-btn pause" onClick={() => pauseDownload(item.id)}>
-                          <Pause size={20} />
-                        </button>
-                      )}
-                      {(item.status === 'paused' || item.status === 'error') && (
-                        <button className="action-btn play" onClick={() => resumeDownload(item.id)}>
-                          <Play size={20} />
-                        </button>
-                      )}
-                      <button className="action-btn cancel" onClick={() => cancelDownload(item.id)}>
-                        <X size={20} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        <section className="downloads-section">
-          <h2 className="section-title">Completed</h2>
-          {groupedCompleted.length === 0 ? (
-            <div className="empty-state">
-              <p>No completed downloads yet.</p>
-            </div>
-          ) : (
-            <div className="completed-grid">
-              {groupedCompleted.map(group => (
-                <div key={group.showName} className="completed-card" onClick={() => handleGroupClick(group)}>
-                  <div className="card-poster" style={{ backgroundImage: `url(${group.poster || ''})` }}>
-                    <div className="play-overlay">
-                      <Play size={40} />
-                    </div>
-                  </div>
-                  <div className="card-details">
-                    <h4 className="title-truncate">{group.showName}</h4>
-                    <p className="size-label">
-                      {group.items.length > 1 ? `${group.items.length} Episodes • ` : ''}
-                      {formatBytes(group.totalBytes)}
-                    </p>
-                  </div>
-                  <button 
-                    className="delete-btn" 
-                    onClick={(e) => handleGroupDelete(group, e)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            </section>
           )}
-        </section>
+
+          <section className="downloads-section">
+            <h2 className="section-title">Completed</h2>
+            {groupedCompleted.length === 0 ? (
+              <div className="empty-state">
+                <p>No completed downloads yet.</p>
+              </div>
+            ) : (
+              <div className="completed-grid">
+                {groupedCompleted.map(group => (
+                  <div key={group.showName} className="completed-card">
+                    <DownloadCardClickable onClick={() => handleGroupClick(group)} poster={group.poster}>
+                      <div className="play-overlay">
+                        <Play size={40} />
+                      </div>
+                    </DownloadCardClickable>
+                    <div className="card-details">
+                      <h4 className="title-truncate">{group.showName}</h4>
+                      <p className="size-label">
+                        {group.items.length > 1 ? `${group.items.length} Episodes • ` : ''}
+                        {formatBytes(group.totalBytes)}
+                      </p>
+                    </div>
+                    <FocusableButton 
+                      className="delete-btn" 
+                      onClick={(e: React.MouseEvent) => handleGroupDelete(group, e)}
+                    >
+                      <Trash2 size={16} />
+                    </FocusableButton>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
+  );
+};
+
+const DownloadCardClickable: React.FC<{children: React.ReactNode, onClick: () => void, poster: string}> = ({children, onClick, poster}) => {
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref, focused } = useFocusable({
+    focusable: tvMode,
+    onEnterPress: onClick,
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  return (
+    <div 
+      ref={ref as any}
+      className={`card-poster ${focused ? 'tv-focus' : ''}`}
+      onClick={onClick}
+      style={{ backgroundImage: `url(${poster || ''})`, cursor: 'pointer' }}
+    >
+      {children}
     </div>
   );
 };

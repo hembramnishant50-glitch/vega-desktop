@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Blocks, ChevronDown, Check } from 'lucide-react';
 import useContentStore from '../../lib/zustand/contentStore';
+import { FocusableButton } from './FocusableButton';
 import './ProviderSwitcher.css';
 
 export const ProviderSwitcher: React.FC = () => {
@@ -29,7 +30,7 @@ export const ProviderSwitcher: React.FC = () => {
 
   return (
     <div className="provider-switcher-container" ref={dropdownRef}>
-      <button 
+      <FocusableButton 
         className="provider-switcher-button glass-overlay"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -38,12 +39,12 @@ export const ProviderSwitcher: React.FC = () => {
           {activeProvider?.display_name || 'Select Provider'}
         </span>
         <ChevronDown size={18} className={`chevron ${isOpen ? 'open' : ''}`} />
-      </button>
+      </FocusableButton>
 
       {isOpen && (
         <div className="provider-dropdown glass-overlay">
           {installedProviders.map(provider => (
-            <button
+            <FocusableButton
               key={`${provider.source?.author}:${provider.value}`}
               className={`provider-option ${activeProvider?.value === provider.value ? 'active' : ''}`}
               onClick={() => handleSelect(provider)}
@@ -59,7 +60,7 @@ export const ProviderSwitcher: React.FC = () => {
               {activeProvider?.value === provider.value && (
                 <Check size={16} className="text-primary" />
               )}
-            </button>
+            </FocusableButton>
           ))}
         </div>
       )}

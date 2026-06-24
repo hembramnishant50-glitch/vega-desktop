@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { settingsStorage } from '../../lib/storage';
 import { CustomSelect } from '../CustomSelect';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 
 const getFontWeightLabel = (weight: number) => {
   if (weight <= 200) return 'Thin';
@@ -24,6 +25,42 @@ const FONT_FAMILY_OPTIONS = [
   { value: 'Comic Sans MS', label: 'Comic Sans MS' },
 ];
 
+const FocusableSlider = ({ value, min, max, step, onChange, className }: any) => {
+  const tvMode = settingsStorage.isTvModeEnabled();
+  
+  const { ref, focused } = useFocusable({
+    focusable: tvMode,
+    onArrowPress: (direction) => {
+      if (direction === 'left') {
+        const newVal = Math.max(min, value - step);
+        onChange({ target: { value: newVal } } as any);
+        return false; // prevent navigation
+      } else if (direction === 'right') {
+        const newVal = Math.min(max, value + step);
+        onChange({ target: { value: newVal } } as any);
+        return false; // prevent navigation
+      }
+      return true; // allow up/down navigation
+    },
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  return (
+    <input 
+      ref={ref as any}
+      type="range" 
+      min={min} 
+      max={max} 
+      step={step} 
+      value={value} 
+      onChange={onChange}
+      className={`${className} ${focused ? 'tv-focus' : ''}`}
+    />
+  );
+};
+
 export const SubtitleSettings: React.FC = () => {
   const [fontFamily, setFontFamily] = useState<string>('sans-serif');
   const [fontSize, setFontSize] = useState<number>(16);
@@ -45,25 +82,25 @@ export const SubtitleSettings: React.FC = () => {
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
+    const val = parseInt(e.target.value as string, 10);
     setFontSize(val);
     settingsStorage.setSubtitleFontSize(val);
   };
 
   const handleFontWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
+    const val = parseInt(e.target.value as string, 10);
     setFontWeight(val);
     settingsStorage.setSubtitleFontWeight(val);
   };
 
   const handleOutlineSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
+    const val = parseInt(e.target.value as string, 10);
     setOutlineSize(val);
     settingsStorage.setSubtitleOutlineSize(val);
   };
 
   const handleBottomPaddingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
+    const val = parseInt(e.target.value as string, 10);
     setBottomPadding(val);
     settingsStorage.setSubtitleBottomPadding(val);
   };
@@ -87,11 +124,10 @@ export const SubtitleSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Font Size ({fontSize}px)</h3>
         </div>
-        <input 
-          type="range" 
-          min="12" 
-          max="100" 
-          step="2" 
+        <FocusableSlider 
+          min={12} 
+          max={100} 
+          step={2} 
           value={fontSize} 
           onChange={handleFontSizeChange}
           className="slider"
@@ -104,11 +140,10 @@ export const SubtitleSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Font Weight ({getFontWeightLabel(fontWeight)})</h3>
         </div>
-        <input 
-          type="range" 
-          min="100" 
-          max="900" 
-          step="100" 
+        <FocusableSlider 
+          min={100} 
+          max={900} 
+          step={100} 
           value={fontWeight} 
           onChange={handleFontWeightChange}
           className="slider"
@@ -121,11 +156,10 @@ export const SubtitleSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Outline Size ({outlineSize}px)</h3>
         </div>
-        <input 
-          type="range" 
-          min="0" 
-          max="10" 
-          step="1" 
+        <FocusableSlider 
+          min={0} 
+          max={10} 
+          step={1} 
           value={outlineSize} 
           onChange={handleOutlineSizeChange}
           className="slider"
@@ -138,11 +172,10 @@ export const SubtitleSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Bottom Padding ({bottomPadding}px)</h3>
         </div>
-        <input 
-          type="range" 
-          min="0" 
-          max="50" 
-          step="5" 
+        <FocusableSlider 
+          min={0} 
+          max={50} 
+          step={5} 
           value={bottomPadding} 
           onChange={handleBottomPaddingChange}
           className="slider"

@@ -112,3 +112,15 @@ button {
   font-weight: 500;
   line-height: 16px;
 }
+
+/* TV Spatial Navigation Focus State */
+.tv-focus {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  transform: scale(1.03);
+  box-shadow: 0 0 15px var(--primary-container);
+  transition: all 0.2s ease-in-out;
+  z-index: 100;
+  border-radius: 8px; /* Safe default, can be overridden by specific components if needed */
+}
+

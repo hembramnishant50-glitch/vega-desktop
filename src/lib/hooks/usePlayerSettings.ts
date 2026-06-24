@@ -57,8 +57,9 @@ export const usePlayerProgress = ({
         Math.abs(currentTime - lastSavedPositionRef.current) > 5 ||
         currentTime - lastSavedPositionRef.current > 5
       ) {
+        const uniqueEpisodeKey = `resume_${routeParams?.primaryTitle}_${routeParams?.secondaryTitle}_${routeParams?.linkIndex}`;
         cacheStorage.setString(
-          activeEpisode.link,
+          uniqueEpisodeKey,
           JSON.stringify({
             position: currentTime,
             duration: seekableDuration,

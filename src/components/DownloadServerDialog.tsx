@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Server, Download, AlertCircle, Copy, Check } from 'lucide-react';
 import { Stream } from '../lib/providers/types';
+import { FocusableButton } from './layout/FocusableButton';
+import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../lib/storage';
 import './DownloadServerDialog.css';
 
 interface DownloadServerDialogProps {
@@ -19,71 +22,90 @@ export const DownloadServerDialog: React.FC<DownloadServerDialogProps> = ({
   onSelect
 }) => {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref: focusRef, focusKey, focusSelf } = useFocusable({
+    focusable: tvMode && isOpen,
+    trackChildren: true,
+    isFocusBoundary: true
+  });
+
+  useEffect(() => {
+    if (isOpen && tvMode) {
+      setTimeout(() => {
+        focusSelf();
+      }, 100);
+    }
+  }, [isOpen, tvMode, focusSelf]);
 
   if (!isOpen) return null;
 
-  const handleCopy = (e: React.MouseEvent, link: string) => {
-    e.stopPropagation();
+  const handleCopy = (e: any, link: string) => {
+    e.stopPropagation?.();
     navigator.clipboard.writeText(link);
     setCopiedLink(link);
     setTimeout(() => setCopiedLink(null), 2000);
   };
 
   return (
-    <div className="download-dialog-overlay" onClick={onClose}>
-      <div className="download-dialog-content" onClick={e => e.stopPropagation()}>
-        <div className="download-dialog-header">
-          <div>
-            <h2 className="headline-sm">Download Options</h2>
-            <p className="text-muted body-sm mt-xs">{episodeTitle}</p>
+    <FocusContext.Provider value={focusKey}>
+      <div className="download-dialog-overlay" onClick={onClose}>
+        <div className="download-dialog-content" onClick={e => e.stopPropagation()} ref={focusRef as any}>
+          <div className="download-dialog-header">
+            <div>
+              <h2 className="headline-sm">Download Options</h2>
+              <p className="text-muted body-sm mt-xs">{episodeTitle}</p>
+            </div>
+            <FocusableButton className="icon-btn" onClick={onClose} style={{ border: 'none', background: 'transparent' }}>
+              <X size={24} />
+            </FocusableButton>
           </div>
-          <button className="icon-btn" onClick={onClose}>
-            <X size={24} />
-          </button>
-        </div>
 
-        <div className="download-dialog-body">
-          {streams.length === 0 ? (
-            <div className="empty-state-dialog">
-              <AlertCircle size={40} className="mb-sm text-yellow-500" />
-              <p>No downloadable streams found.</p>
-            </div>
-          ) : (
-            <div className="stream-list">
-              {streams.map((stream, idx) => (
-                <div
-                  key={idx}
-                  className="stream-item"
-                  onClick={() => {
-                    onSelect(stream);
-                    onClose();
-                  }}
-                >
-                  <div className="stream-icon">
-                    <Server size={20} />
-                  </div>
-                  <div className="stream-details">
-                    <h4 className="label-lg">{stream.server || 'Unknown Server'}</h4>
-                    <span className="quality-badge">
-                      {stream.quality ? `${stream.quality}` : stream.type.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="stream-action">
-                    <button
-                      className="copy-btn"
-                      onClick={(e) => handleCopy(e, stream.link)}
-                      title="Copy Stream Link"
-                    >
-                      {copiedLink === stream.link ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
-                    </button>
-                    <Download size={20} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="download-dialog-body">
+            {streams.length === 0 ? (
+              <div className="empty-state-dialog">
+                <AlertCircle size={40} className="mb-sm text-yellow-500" />
+                <p>No downloadable streams found.</p>
+              </div>
+            ) : (
+              <div className="stream-list">
+                {streams.map((stream, idx) => (
+                  <FocusableButton
+                    key={idx}
+                    className="stream-item"
+                    onClick={() => {
+                      onSelect(stream);
+                      onClose();
+                    }}
+                    style={{ background: 'transparent', border: '1px solid var(--surface-variant)', textAlign: 'left', width: '100%' }}
+                  >
+                    <div className="stream-icon">
+                      <Server size={20} />
+                    </div>
+                    <div className="stream-details" style={{ flex: 1 }}>
+                      <h4 className="label-lg">{stream.server || 'Unknown Server'}</h4>
+                      <span className="quality-badge">
+                        {stream.quality ? `${stream.quality}` : stream.type.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="stream-action" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <FocusableButton
+                        className="copy-btn"
+                        onClick={(e: any) => handleCopy(e, stream.link)}
+                        title="Copy Stream Link"
+                        style={{ border: 'none', background: 'transparent', padding: '8px' }}
+                      >
+                        {copiedLink === stream.link ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
+                      </FocusableButton>
+                      <Download size={20} />
+                    </div>
+                  </FocusableButton>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </FocusContext.Provider>
   );
 };

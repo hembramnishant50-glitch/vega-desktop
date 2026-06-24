@@ -1,16 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Blocks, Plus, Trash2, DownloadCloud, RotateCcw } from 'lucide-react';
 import useContentStore from '../lib/zustand/contentStore';
 import { extensionManager } from '../lib/services/ExtensionManager';
 import { extensionStorage, ProviderSource, ProviderExtension } from '../lib/storage/extensionStorage';
 import { createProviderSource } from '../lib/utils/helpers';
+import { FocusableButton } from '../components/layout/FocusableButton';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
+import { resume } from '@noriginmedia/norigin-spatial-navigation-core';
+import { settingsStorage } from '../lib/storage';
 import './ExtensionsPage.css';
 
+const ExtensionInput: React.FC<{
+  focusKey?: string;
+  inputValue: string;
+  setInputValue: (v: string) => void;
+  handleAddSource: () => void;
+  tvMode: boolean;
+}> = ({ focusKey, inputValue, setInputValue, handleAddSource, tvMode }) => {
+  const [isTyping, setIsTyping] = useState(false);
+  const nativeInputRef = useRef<HTMLInputElement>(null);
+
+  const { ref: focusRef, focused, focusSelf } = useFocusable({
+    focusable: tvMode,
+    focusKey,
+    onArrowPress: (direction) => {
+      // Prevent focus from flying off screen upwards since there's no topbar here
+      if (direction === 'up') return false;
+      return true;
+    },
+    onEnterPress: () => {
+      setIsTyping(true);
+      setTimeout(() => {
+        nativeInputRef.current?.focus();
+      }, 50);
+    }
+  });
+
+  const handleInputBlur = () => {
+    setIsTyping(false);
+    setTimeout(() => {
+      resume();
+      focusSelf();
+    }, 100);
+  };
+
+  return (
+    <div
+      // @ts-ignore
+      ref={focusRef}
+      className={`input-wrapper ${focused ? 'tv-focus' : ''}`}
+      style={{ flex: 1, display: 'flex', background: 'transparent', border: 'none', padding: 0, margin: 0, outline: 'none', cursor: 'text' }}
+      onClick={() => {
+        setIsTyping(true);
+        setTimeout(() => nativeInputRef.current?.focus(), 50);
+      }}
+    >
+      <input
+        ref={nativeInputRef}
+        type="text"
+        tabIndex={-1}
+        readOnly={tvMode ? !isTyping : false}
+        placeholder="Enter source name or url to add provider"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onBlur={handleInputBlur}
+        onKeyDown={(e) => {
+          if (isTyping) {
+            if (e.key === 'Escape' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+              e.stopPropagation();
+              e.preventDefault();
+              nativeInputRef.current?.blur();
+            } else if (e.key === 'Enter') {
+              e.stopPropagation();
+              e.preventDefault();
+              nativeInputRef.current?.blur();
+              handleAddSource();
+            } else {
+              e.stopPropagation();
+            }
+          } else {
+            nativeInputRef.current?.blur();
+          }
+        }}
+        className="input-field"
+        style={{ width: '100%', outline: 'none', background: 'transparent', border: 'none', color: 'inherit' }}
+      />
+    </div>
+  );
+};
+
 export const ExtensionsPage: React.FC = () => {
-  const { 
-    installedProviders, 
-    availableProviders, 
-    setInstalledProviders, 
+  const {
+    installedProviders,
+    availableProviders,
+    setInstalledProviders,
     setAvailableProviders,
     provider: activeProvider,
     setProvider
@@ -21,6 +104,8 @@ export const ExtensionsPage: React.FC = () => {
   const [activeSource, setActiveSource] = useState<ProviderSource | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const tvMode = settingsStorage.isTvModeEnabled();
 
   useEffect(() => {
     loadSources();
@@ -114,37 +199,47 @@ export const ExtensionsPage: React.FC = () => {
       <div className="sources-section glass-overlay">
         <h2 className="headline-md">Provider Sources</h2>
         <div className="add-source-form">
-          <input 
-            type="text" 
-            placeholder="Enter source name or url to add provider" 
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="input-field"
+          <ExtensionInput
+            focusKey="EXTENSION_INPUT"
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            handleAddSource={handleAddSource}
+            tvMode={tvMode}
           />
-          <button className="btn-primary" onClick={handleAddSource}>
+          <FocusableButton className="btn-primary" onClick={handleAddSource}>
             <Plus size={20} /> Add Source
-          </button>
+          </FocusableButton>
         </div>
 
         {sources.length > 0 && (
           <div className="source-list">
             {sources.map(source => (
-              <div 
-                key={source.author} 
+              <div
+                key={source.author}
                 className={`source-card ${activeSource?.author === source.author ? 'active' : ''}`}
-                onClick={() => {
-                  extensionStorage.setDefaultProviderSource(source.author);
-                  loadSources();
-                }}
+                style={{ display: 'flex', padding: 0, overflow: 'hidden' }}
               >
-                <div>
+                <FocusableButton
+                  style={{ flex: 1, textAlign: 'left', padding: '16px', background: 'transparent', border: 'none', color: 'inherit' }}
+                  onClick={() => {
+                    extensionStorage.setDefaultProviderSource(source.author);
+                    loadSources();
+                  }}
+                >
                   <h3 className="label-lg">{source.author}</h3>
                   <p className="label-md text-muted">{source.url}</p>
-                </div>
+                </FocusableButton>
+
                 {activeSource?.author === source.author && (
-                  <button className="icon-btn" onClick={(e) => { e.stopPropagation(); refreshManifest(source); }} disabled={isLoading}>
-                    <RotateCcw size={20} className={isLoading ? 'spin' : ''} />
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: '16px' }}>
+                    <FocusableButton
+                      className="icon-btn"
+                      onClick={(e: any) => { e.stopPropagation(); refreshManifest(source); }}
+                      disabled={isLoading}
+                    >
+                      <RotateCcw size={20} className={isLoading ? 'spin' : ''} />
+                    </FocusableButton>
+                  </div>
                 )}
               </div>
             ))}
@@ -174,13 +269,13 @@ export const ExtensionsPage: React.FC = () => {
                   {activeProvider?.value === provider.value ? (
                     <span className="badge active">Active</span>
                   ) : (
-                    <button className="btn-secondary" onClick={() => setProvider(provider)}>
+                    <FocusableButton className="btn-secondary" onClick={() => setProvider(provider)}>
                       Set Active
-                    </button>
+                    </FocusableButton>
                   )}
-                  <button className="icon-btn danger" onClick={() => handleUninstall(provider.value, provider.source.author)}>
+                  <FocusableButton className="icon-btn danger" onClick={() => handleUninstall(provider.value, provider.source.author)}>
                     <Trash2 size={20} />
-                  </button>
+                  </FocusableButton>
                 </div>
               </div>
             ))}
@@ -205,13 +300,13 @@ export const ExtensionsPage: React.FC = () => {
                       <p className="label-md text-muted">v{provider.version} • {provider.type}</p>
                     </div>
                   </div>
-                  <button 
-                    className="btn-primary" 
+                  <FocusableButton
+                    className="btn-primary"
                     onClick={() => handleInstall(provider)}
                     disabled={isLoading}
                   >
                     <DownloadCloud size={20} /> Install
-                  </button>
+                  </FocusableButton>
                 </div>
               );
             })}
@@ -221,3 +316,4 @@ export const ExtensionsPage: React.FC = () => {
     </div>
   );
 };
+

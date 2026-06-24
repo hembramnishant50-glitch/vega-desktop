@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDownloadStore, DownloadItem } from '../lib/zustand/downloadStore';
 import { Play, ArrowLeft, Trash2 } from 'lucide-react';
 import { CustomSelect } from '../components/CustomSelect';
+import { FocusableButton } from '../components/layout/FocusableButton';
 import './DownloadsPage.css';
 
 export const DownloadsSeriesPage = () => {
@@ -71,18 +72,18 @@ export const DownloadsSeriesPage = () => {
   };
 
   return (
-    <div className="downloads-page">
+    <div className="downloads-series-page">
       <div className="downloads-header" style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <button className="icon-btn back-btn glass-overlay" onClick={() => navigate('/downloads')}>
+        <FocusableButton className="icon-btn back-btn glass-overlay" onClick={() => navigate('/downloads')}>
           <ArrowLeft size={24} />
-        </button>
+        </FocusableButton>
         <h1 className="headline-lg" style={{ margin: 0 }}>{decodedShowName}</h1>
       </div>
 
       <div className="series-downloads-content" style={{ display: 'flex', gap: '32px' }}>
         <div className="series-poster-col" style={{ width: '280px', flexShrink: 0 }}>
-          <div style={{ 
-            backgroundImage: `url(${poster || ''})`, 
+          <div style={{
+            backgroundImage: `url(${poster || ''})`,
             aspectRatio: '2/3',
             width: '100%',
             borderRadius: '16px',
@@ -112,23 +113,23 @@ export const DownloadsSeriesPage = () => {
 
           <div className="episodes-list">
             {currentSeasonDownloads.map((item, idx) => (
-              <div 
-                key={item.id} 
-                className="episode-card glass-overlay"
-                onClick={() => handlePlay(item, idx)}
-                style={{ display: 'flex', alignItems: 'center', padding: '16px', borderRadius: '12px', marginBottom: '12px', cursor: 'pointer', background: 'rgba(255, 255, 255, 0.05)' }}
-              >
-                <div className="episode-number" style={{ width: '40px', fontSize: '1.2rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>
-                  {idx + 1}
-                </div>
-                <div className="episode-info" style={{ flex: 1 }}>
-                  <h4 className="label-lg">{item.episodeName || item.title}</h4>
-                  <p className="text-muted body-sm" style={{ marginTop: '4px' }}>{formatBytes(item.totalBytes)}</p>
-                </div>
-                <div className="episode-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <button 
-                    className="icon-btn" 
-                    onClick={(e) => {
+              <div key={item.id} className="episode-card glass-overlay" style={{ padding: 0, display: 'flex', marginBottom: '12px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
+                <FocusableButton
+                  onClick={() => handlePlay(item, idx)}
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '16px', gap: '16px', background: 'transparent', border: 'none', textAlign: 'left', color: 'inherit', borderRadius: '12px' }}
+                >
+                  <div className="episode-number" style={{ width: '40px', fontSize: '1.2rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>
+                    {idx + 1}
+                  </div>
+                  <div className="episode-info" style={{ flex: 1 }}>
+                    <h4 className="label-lg">{item.episodeName || item.title}</h4>
+                    <p className="text-muted body-sm" style={{ marginTop: '4px' }}>{formatBytes(item.totalBytes)}</p>
+                  </div>
+                </FocusableButton>
+                <div className="episode-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', paddingRight: '16px' }}>
+                  <FocusableButton
+                    className="icon-btn"
+                    onClick={(e: React.MouseEvent) => {
                       e.stopPropagation();
                       cancelDownload(item.id);
                     }}
@@ -136,10 +137,10 @@ export const DownloadsSeriesPage = () => {
                     title="Delete Download"
                   >
                     <Trash2 size={20} />
-                  </button>
-                  <button className="icon-btn" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
+                  </FocusableButton>
+                  <FocusableButton className="icon-btn" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }} onClick={() => handlePlay(item, idx)}>
                     <Play size={20} fill="currentColor" />
-                  </button>
+                  </FocusableButton>
                 </div>
               </div>
             ))}

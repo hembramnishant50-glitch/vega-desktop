@@ -1,0 +1,53 @@
+import React from 'react';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../../lib/storage';
+
+interface FocusableButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  // If true, will not take focus
+  disabled?: boolean;
+  focusKey?: string;
+}
+
+export const FocusableButton: React.FC<FocusableButtonProps> = ({ 
+  children, 
+  onClick, 
+  className = '', 
+  disabled = false,
+  focusKey,
+  ...rest 
+}) => {
+  const isAndroid = navigator.userAgent.toLowerCase().includes('android');
+  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const { ref, focused } = useFocusable({
+    focusable: tvMode && !disabled,
+    focusKey,
+    onEnterPress: () => {
+      if (onClick) {
+        // Mock a React.MouseEvent to prevent crashes when stopPropagation is called
+        onClick({
+          stopPropagation: () => {},
+          preventDefault: () => {},
+          target: ref.current,
+          currentTarget: ref.current
+        } as any);
+      }
+    },
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  return (
+    <div
+      {...rest as any}
+      // @ts-ignore
+      ref={ref}
+      role="button"
+      className={`${className} ${focused ? 'tv-focus' : ''}`.trim()}
+      onClick={onClick}
+      style={{ ...rest.style, opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
+    >
+      {children}
+    </div>
+  );
+};

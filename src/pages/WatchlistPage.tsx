@@ -2,12 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bookmark, Play, Trash2 } from 'lucide-react';
 import useWatchListStore from '../lib/zustand/watchListStore';
+import { FocusableButton } from '../components/layout/FocusableButton';
+import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
+import { settingsStorage } from '../lib/storage';
 import './SearchPage.css'; // Reuse search page grid styles for now
 import './WatchlistPage.css';
 
 export const WatchlistPage: React.FC = () => {
   const navigate = useNavigate();
   const { watchList, removeItem } = useWatchListStore();
+
+
 
   const handlePostClick = (link: string) => {
     navigate(`/content/${encodeURIComponent(link)}`);
@@ -29,42 +34,60 @@ export const WatchlistPage: React.FC = () => {
   }
 
   return (
-    <div className="search-page">
-      <div className="page-header">
-        <div className="page-header-icon">
-          <Bookmark size={36} />
-        </div>
-        <div className="page-header-content">
-          <h1 className="display-sm">Watchlist</h1>
-          <p className="body-lg text-muted">{watchList.length} saved {watchList.length === 1 ? 'item' : 'items'}</p>
-        </div>
-      </div>
-
-      <div className="search-grid">
-        {watchList.map((post, index) => (
-          <div 
-            key={`${post.link}-${index}`} 
-            className="search-card watchlist-card"
-            onClick={() => handlePostClick(post.link)}
-          >
-            <div className="search-poster-container">
-              <img src={post.poster} alt={post.title} className="search-poster" loading="lazy" />
-              <div className="search-hover-overlay">
-                <Play size={48} fill="currentColor" />
-              </div>
-              <button 
-                className="watchlist-remove-btn"
-                onClick={(e) => handleRemove(e, post.link)}
-                aria-label="Remove from watchlist"
-                title="Remove from watchlist"
-              >
-                <Trash2 size={20} />
-              </button>
-            </div>
-            <h3 className="search-title label-md">{post.title}</h3>
+    <div className="watchlist-page">
+        <div className="page-header">
+          <div className="page-header-icon">
+            <Bookmark size={36} />
           </div>
-        ))}
+          <div className="page-header-content">
+            <h1 className="display-sm">Watchlist</h1>
+            <p className="body-lg text-muted">{watchList.length} saved {watchList.length === 1 ? 'item' : 'items'}</p>
+          </div>
+        </div>
+
+        <div className="search-grid">
+          {watchList.map((post, index) => (
+            <div key={`${post.link}-${index}`} className="search-card watchlist-card">
+              <WatchlistCardClickable onClick={() => handlePostClick(post.link)}>
+                <img src={post.poster} alt={post.title} className="search-poster" loading="lazy" />
+                <div className="search-hover-overlay">
+                  <Play size={48} fill="currentColor" />
+                </div>
+                <FocusableButton 
+                  className="watchlist-remove-btn"
+                  onClick={(e: any) => handleRemove(e, post.link)}
+                  aria-label="Remove from watchlist"
+                  title="Remove from watchlist"
+                >
+                  <Trash2 size={20} />
+                </FocusableButton>
+              </WatchlistCardClickable>
+              <h3 className="search-title label-md">{post.title}</h3>
+            </div>
+          ))}
+        </div>
       </div>
+  );
+};
+
+const WatchlistCardClickable: React.FC<{children: React.ReactNode, onClick: () => void}> = ({children, onClick}) => {
+  const tvMode = settingsStorage.isTvModeEnabled();
+  const { ref, focused } = useFocusable({
+    focusable: tvMode,
+    onEnterPress: onClick,
+    onFocus: (layout) => {
+      layout.node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+
+  return (
+    <div 
+      ref={ref as any}
+      className={`search-poster-container ${focused ? 'tv-focus' : ''}`}
+      onClick={onClick}
+      style={{ cursor: 'pointer', outlineOffset: '4px' }}
+    >
+      {children}
     </div>
   );
 };
