@@ -1,3 +1,4 @@
+mod cookie_manager;
 mod download_manager;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -30,7 +31,9 @@ pub fn run() {
             greet,
             download_manager::start_download,
             download_manager::pause_download,
-            download_manager::cancel_download
+            download_manager::cancel_download,
+            cookie_manager::get_cookies_for_url,
+            cookie_manager::clear_cookies_for_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
