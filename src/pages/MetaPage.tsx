@@ -35,7 +35,8 @@ const FocusableEpisodeCard: React.FC<{
           border: 'none', 
           textAlign: 'left', 
           color: 'inherit',
-          borderRadius: 'var(--rounded-lg)'
+          borderRadius: 'var(--rounded-lg)',
+          minWidth: 0
         }}
       >
         {children[0]}
