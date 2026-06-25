@@ -8,24 +8,24 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn open_external_player(url: String) -> Result<(), String> {
+fn open_external_player(_url: String) -> Result<(), String> {
     #[cfg(target_os = "linux")]
     {
         if std::process::Command::new("mpv")
             .arg("--player-operation-mode=pseudo-gui")
             .arg("--fs")
             .arg("--osc")
-            .arg(&url)
+            .arg(&_url)
             .spawn().is_ok() {
             return Ok(());
         }
         if std::process::Command::new("vlc")
             .arg("--fullscreen")
-            .arg(&url)
+            .arg(&_url)
             .spawn().is_ok() {
             return Ok(());
         }
-        if std::process::Command::new("xdg-open").arg(&url).spawn().is_ok() {
+        if std::process::Command::new("xdg-open").arg(&_url).spawn().is_ok() {
             return Ok(());
         }
         return Err("Failed to launch external player".into());
