@@ -12,6 +12,7 @@ export const PreferencesSettings: React.FC = () => {
   const [autoInstallUpdates, setAutoInstallUpdates] = useState<boolean>(true);
   const [autoCheckUpdates, setAutoCheckUpdates] = useState<boolean>(true);
   const [tvModeEnabled, setTvModeEnabled] = useState<boolean>(false);
+  const [hwAccelEnabled, setHwAccelEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     setDownloadLocation(settingsStorage.getDownloadLocation());
@@ -19,6 +20,7 @@ export const PreferencesSettings: React.FC = () => {
     setAutoInstallUpdates(settingsStorage.isAutoDownloadEnabled());
     setAutoCheckUpdates(settingsStorage.isAutoCheckUpdateEnabled());
     setTvModeEnabled(settingsStorage.isTvModeEnabled());
+    setHwAccelEnabled(settingsStorage.isHardwareAccelerationEnabled());
   }, []);
 
   const handleChangeDir = async () => {
@@ -66,6 +68,12 @@ export const PreferencesSettings: React.FC = () => {
     const nextState = !tvModeEnabled;
     setTvModeEnabled(nextState);
     settingsStorage.setTvModeEnabled(nextState);
+  };
+
+  const handleToggleHwAccel = () => {
+    const nextState = !hwAccelEnabled;
+    setHwAccelEnabled(nextState);
+    settingsStorage.setHardwareAccelerationEnabled(nextState);
   };
 
   const isAndroid = navigator.userAgent.toLowerCase().includes('android');
@@ -148,6 +156,22 @@ export const PreferencesSettings: React.FC = () => {
           onClick={handleToggleTvMode}
         >
           {tvModeEnabled ? 'ON' : 'OFF'}
+        </FocusableButton>
+      </div>
+
+      <div className="settings-divider" />
+      
+      {/* Hardware Acceleration */}
+      <div className="settings-row">
+        <div className="settings-info">
+          <h3 className="label-lg">Hardware Acceleration</h3>
+          <p className="body-md text-muted">Use GPU to decode video. Turn off if you experience playback issues.</p>
+        </div>
+        <FocusableButton 
+          className={`theme-toggle-btn ${hwAccelEnabled ? 'active' : ''}`}
+          onClick={handleToggleHwAccel}
+        >
+          {hwAccelEnabled ? 'ON' : 'OFF'}
         </FocusableButton>
       </div>
 

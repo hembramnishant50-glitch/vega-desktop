@@ -5,8 +5,8 @@ import {
   ProviderModule,
   ProviderSource,
 } from '../storage/extensionStorage';
-import {mainStorage} from '../storage/StorageService';
-import {createProviderSource} from '../utils/helpers';
+import { mainStorage } from '../storage/StorageService';
+import { createProviderSource } from '../utils/helpers';
 /**
  * Extension manager service for handling dynamic provider loading
  */
@@ -72,7 +72,7 @@ export class ExtensionManager {
   // Test mode configuration
   private testModuleCache = new Map<
     string,
-    {module: ProviderModule; cachedAt: number}
+    { module: ProviderModule; cachedAt: number }
   >();
 
   static getInstance(): ExtensionManager {

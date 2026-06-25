@@ -26,9 +26,11 @@
     "active": true,
     "targets": "all",
     "createUpdaterArtifacts": true,
-    "resources": [
-      "lib/*.dll"
-    ],
+    "linux": {
+      "deb": {
+        "depends": ["libmpv2", "mpv"]
+      }
+    },
     "android": {
       "versionCode": 2
     },

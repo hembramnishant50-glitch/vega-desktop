@@ -120,20 +120,26 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
     if (!globalInitPromise) {
       globalInitPromise = (async () => {
         try {
+          const hwAccel = settingsStorage.isHardwareAccelerationEnabled();
+          const initialOptions: Record<string, string> = {
+            'keep-open': 'yes',
+            'force-window': 'no',
+            'osd-level': '0',
+            'sub-auto': 'fuzzy',
+            'sub-font-size': (settingsStorage.getSubtitleFontSize() || 36).toString(),
+            'sub-border-size': '2',
+            'sub-shadow-offset': '1',
+            'sub-margin-y': (settingsStorage.getSubtitleBottomPadding() || 36).toString(),
+            'sub-ass-override': 'force',
+          };
+
+          if (hwAccel) {
+            initialOptions['vo'] = 'gpu-next';
+            initialOptions['hwdec'] = 'auto-safe';
+          }
+
           await init({
-            initialOptions: {
-              'vo': 'gpu-next',
-              'hwdec': 'auto-safe',
-              'keep-open': 'yes',
-              'force-window': 'no',
-              'osd-level': '0',
-              'sub-auto': 'fuzzy',
-              'sub-font-size': (settingsStorage.getSubtitleFontSize() || 36).toString(),
-              'sub-border-size': '2',
-              'sub-shadow-offset': '1',
-              'sub-margin-y': (settingsStorage.getSubtitleBottomPadding() || 36).toString(),
-              'sub-ass-override': 'force',
-            },
+            initialOptions,
             observedProperties: OBSERVED_PROPERTIES,
           });
         } catch (err) {
@@ -409,16 +415,16 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
         if (weight >= 600) isBold = 'yes';
       }
       
-      await setProperty('sub-font', fontName);
-      await setProperty('sub-bold', isBold);
-      await setProperty('sub-font-size', size.toString());
-      await setProperty('sub-margin-y', margin.toString());
-      await setProperty('sub-ass-override', 'force');
-      await setProperty('sub-color', '#FFFFFFFF');
-      await setProperty('sub-border-size', outlineSize.toString());
-      await setProperty('sub-shadow-offset', '1');
-      await setProperty('sub-border-color', '#FF000000');
-      await setProperty('sub-border-style', 'outline-and-shadow');
+      await setProperty('sub-font', fontName).catch(() => {});
+      await setProperty('sub-bold', isBold).catch(() => {});
+      await setProperty('sub-font-size', size.toString()).catch(() => {});
+      await setProperty('sub-margin-y', margin.toString()).catch(() => {});
+      await setProperty('sub-ass-override', 'force').catch(() => {});
+      await setProperty('sub-color', '#FFFFFFFF').catch(() => {});
+      await setProperty('sub-border-size', outlineSize.toString()).catch(() => {});
+      await setProperty('sub-shadow-offset', '1').catch(() => {});
+      await setProperty('sub-border-color', '#FF000000').catch(() => {});
+      await setProperty('sub-border-style', 'outline-and-shadow').catch(() => {});
       
       // Clear out background color properties just in case
       await setProperty('sub-back-color', '#00000000').catch(() => {});

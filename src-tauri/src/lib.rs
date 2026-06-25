@@ -7,6 +7,35 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+fn open_external_player(url: String) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        if std::process::Command::new("mpv")
+            .arg("--player-operation-mode=pseudo-gui")
+            .arg("--fs")
+            .arg("--osc")
+            .arg(&url)
+            .spawn().is_ok() {
+            return Ok(());
+        }
+        if std::process::Command::new("vlc")
+            .arg("--fullscreen")
+            .arg(&url)
+            .spawn().is_ok() {
+            return Ok(());
+        }
+        if std::process::Command::new("xdg-open").arg(&url).spawn().is_ok() {
+            return Ok(());
+        }
+        return Err("Failed to launch external player".into());
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        return Err("Not supported on this OS".into());
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
@@ -33,7 +62,8 @@ pub fn run() {
             download_manager::pause_download,
             download_manager::cancel_download,
             cookie_manager::get_cookies_for_url,
-            cookie_manager::clear_cookies_for_url
+            cookie_manager::clear_cookies_for_url,
+            open_external_player
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

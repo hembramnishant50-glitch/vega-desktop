@@ -79,8 +79,9 @@ const PlayerInner: React.FC<PlayerInnerProps> = ({ state }) => {
   });
 
   const isAndroid = navigator.userAgent.toLowerCase().includes('android');
+  const isLinux = navigator.userAgent.toLowerCase().includes('linux') && !isAndroid;
 
-  if (isAndroid) {
+  if (isAndroid || isLinux) {
     return (
       <TvPlayer
         state={state}
@@ -90,6 +91,8 @@ const PlayerInner: React.FC<PlayerInnerProps> = ({ state }) => {
         streamData={streamData}
         selectedStream={selectedStream}
         setSelectedStream={setSelectedStream}
+        isAndroid={isAndroid}
+        isLinux={isLinux}
       />
     );
   }
@@ -119,9 +122,12 @@ const TvPlayer: React.FC<any> = ({
   streamData,
   selectedStream,
   setSelectedStream,
+  isAndroid,
+  isLinux
 }) => {
   const navigate = useNavigate();
   const { addItem } = useWatchHistoryStore();
+  const [isLaunching, setIsLaunching] = useState(false);
 
   const { ref: focusRef, focusKey, focusSelf } = useFocusable({
     focusable: true,
@@ -158,15 +164,24 @@ const TvPlayer: React.FC<any> = ({
 
   const handlePlayNative = useCallback(async (stream: any) => {
     if (!stream?.link) return;
+    setIsLaunching(true);
     try {
-      const { openUrl } = await import('@tauri-apps/plugin-opener');
-      const headers = stream.headers ? JSON.stringify(stream.headers) : '';
-      const intentUrl = `vega://play?url=${encodeURIComponent(stream.link)}&headers=${encodeURIComponent(headers)}`;
-      await openUrl(intentUrl);
+      if (isAndroid) {
+        const { openUrl } = await import('@tauri-apps/plugin-opener');
+        const headers = stream.headers ? JSON.stringify(stream.headers) : '';
+        const intentUrl = `vega://play?url=${encodeURIComponent(stream.link)}&headers=${encodeURIComponent(headers)}`;
+        await openUrl(intentUrl);
+      } else if (isLinux) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('open_external_player', { url: stream.link }).catch(console.error);
+      }
     } catch (e) {
-      console.error("Failed to open native player", e);
+      console.error("Failed to open player", e);
+    } finally {
+      // Keep loader visible for a couple seconds to cover the external player's startup time
+      setTimeout(() => setIsLaunching(false), 2000);
     }
-  }, []);
+  }, [isAndroid, isLinux]);
 
   if (streamLoading) {
     return (
@@ -217,25 +232,32 @@ const TvPlayer: React.FC<any> = ({
           <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '8px', textAlign: 'center', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{state.primaryTitle}</h2>
           {activeEpisode?.title && <h3 style={{ fontSize: '1.5rem', color: '#ccc', marginBottom: '40px', fontWeight: 500 }}>{activeEpisode.title}</h3>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '400px' }}>
-            <h4 style={{ fontSize: '1.1rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Select Server</h4>
+          {isLaunching ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '40px' }}>
+              <div className="loading-spinner" />
+              <span style={{ marginTop: '16px', fontSize: '1.2rem', color: '#ccc' }}>Opening External Player...</span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '400px' }}>
+              <h4 style={{ fontSize: '1.1rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Select Server</h4>
 
-            {streamData?.map((stream: any, idx: number) => (
-              <FocusableButton
-                key={idx}
-                focusKey={`TV_SERVER_${idx}`}
-                className={`action-btn ${selectedStream?.link === stream.link ? 'primary-btn' : 'secondary-btn'}`}
-                style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '1.2rem', borderRadius: '12px' }}
-                onClick={() => {
-                  setSelectedStream(stream);
-                  handlePlayNative(stream);
-                }}
-              >
-                <Play size={20} style={{ marginRight: '10px' }} />
-                {stream.server || `Server ${idx + 1}`} {stream.quality ? `(${stream.quality})` : ''}
-              </FocusableButton>
-            ))}
-          </div>
+              {streamData?.map((stream: any, idx: number) => (
+                <FocusableButton
+                  key={idx}
+                  focusKey={`TV_SERVER_${idx}`}
+                  className={`action-btn ${selectedStream?.link === stream.link ? 'primary-btn' : 'secondary-btn'}`}
+                  style={{ width: '100%', justifyContent: 'center', padding: '16px', fontSize: '1.2rem', borderRadius: '12px' }}
+                  onClick={() => {
+                    setSelectedStream(stream);
+                    handlePlayNative(stream);
+                  }}
+                >
+                  <Play size={20} style={{ marginRight: '10px' }} />
+                  {stream.server || `Server ${idx + 1}`} {stream.quality ? `(${stream.quality})` : ''}
+                </FocusableButton>
+              ))}
+            </div>
+          )}
 
           <FocusableButton
             focusKey="TV_SERVER_BACK"

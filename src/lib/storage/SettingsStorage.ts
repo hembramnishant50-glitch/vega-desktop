@@ -44,6 +44,9 @@ export enum SettingsKeys {
 
   // Telemetry (privacy)
   TELEMETRY_OPT_IN = 'telemetryOptIn',
+
+  // Advanced settings
+  HARDWARE_ACCELERATION = 'hardwareAcceleration',
 }
 
 /**
@@ -260,6 +263,15 @@ export class SettingsStorage {
 
   setTelemetryOptIn(enabled: boolean): void {
     mainStorage.setBool(SettingsKeys.TELEMETRY_OPT_IN, enabled);
+  }
+
+  // Advanced Settings
+  isHardwareAccelerationEnabled(): boolean {
+    return mainStorage.getBool(SettingsKeys.HARDWARE_ACCELERATION, false);
+  }
+
+  setHardwareAccelerationEnabled(enabled: boolean): void {
+    mainStorage.setBool(SettingsKeys.HARDWARE_ACCELERATION, enabled);
   }
 
   // Generic get/set methods for settings not covered by specific methods
