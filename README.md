@@ -33,6 +33,18 @@ https://github.com/vega-org/vega-app
 > Follow the guide here https://vega.8man.in/guide/adding-providers/
 
 
+
+### Sreenshots
+<img width="2047" height="1077" alt="Screenshot 2026-06-26 112125" src="https://github.com/user-attachments/assets/ade6354c-cc1c-448a-a353-dc6912246471" />
+<details>
+  <summary>More</summary>
+  <img width="853" height="445" alt="Screenshot 2026-06-26 113245" src="https://github.com/user-attachments/assets/28e7a630-a822-4dc5-9a26-f102ac3b0240" />
+  <img width="853" height="444" alt="Screenshot 2026-06-26 113101" src="https://github.com/user-attachments/assets/43f2119a-b61c-498e-8421-00cd9ca8f3da" />
+  <img width="2042" height="1087" alt="Screenshot 2026-06-26 112352" src="https://github.com/user-attachments/assets/ad8692ac-d9ed-4784-b4e1-3243cd16d966" />
+
+</details>
+
+
 ___
 
 ## Stack
