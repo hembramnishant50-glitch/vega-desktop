@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Server, Download, AlertCircle, Copy, Check } from 'lucide-react';
+import { LuX as X, LuServer as Server, LuDownload as Download, LuCircleAlert as AlertCircle, LuCopy as Copy, LuCheck as Check } from 'react-icons/lu';
 import { Stream } from '../lib/providers/types';
 import { FocusableButton } from './layout/FocusableButton';
 import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';

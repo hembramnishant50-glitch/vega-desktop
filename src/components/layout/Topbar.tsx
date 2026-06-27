@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { LuSearch as Search } from 'react-icons/lu';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ProviderSwitcher } from './ProviderSwitcher';
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';

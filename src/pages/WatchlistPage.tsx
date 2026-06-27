@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Play, Trash2 } from 'lucide-react';
+import { LuBookmark as Bookmark, LuPlay as Play, LuTrash2 as Trash2 } from 'react-icons/lu';
 import useWatchListStore from '../lib/zustand/watchListStore';
 import { FocusableButton } from '../components/layout/FocusableButton';
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';

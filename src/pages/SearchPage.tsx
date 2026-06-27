@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, Loader2 } from 'lucide-react';
+import { LuSearch as Search, LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { useGlobalSearch } from '../lib/hooks/useGlobalSearch';
 import { ContentSlider } from '../components/home/ContentSlider';
 

@@ -280,7 +280,7 @@
 
 .timeline-progress {
   height: 100%;
-  background: #ffb4b4; /* light pink from screenshot */
+  background: var(--primary);
   border-radius: 999px;
   position: relative;
   transition: width 0.08s linear;
@@ -294,10 +294,11 @@
   background: var(--primary);
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(0,0,0,0.4);
-  opacity: 0;
-  transition: opacity 0.12s;
+  transition: transform 0.12s, width 0.12s, height 0.12s;
 }
-.timeline-track:hover .timeline-thumb { opacity: 1; }
+.timeline-track:hover .timeline-thumb { 
+  transform: translateY(-50%) scale(1.25);
+}
 
 /* ---- Bottom Actions ---- */
 .player-actions-row {
@@ -305,7 +306,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 4px;
-  padding: 0 20px;
+  padding: 0 58px;
 }
 
 .player-actions-left,
@@ -417,12 +418,12 @@
 .action-btn.text-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px;
+  gap: 8px;
+  padding: 6px 8px;
   background: transparent;
   border-radius: var(--rounded-DEFAULT);
   color: rgba(255,255,255,0.8);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 500;
   transition: all 0.12s;
   user-select: none;

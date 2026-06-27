@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Download, Loader2 } from 'lucide-react';
+import { LuSearch as Search, LuX as X, LuDownload as Download, LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { CustomSelect } from './CustomSelect';
 import './SearchSubtitlesModal.css';
 

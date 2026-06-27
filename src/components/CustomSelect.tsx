@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { LuChevronDown as ChevronDown, LuChevronUp as ChevronUp } from 'react-icons/lu';
 import { FocusableButton } from './layout/FocusableButton';
 import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
 import { settingsStorage } from '../lib/storage';

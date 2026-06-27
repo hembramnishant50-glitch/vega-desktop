@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { settingsStorage } from '../../lib/storage';
 import { open } from '@tauri-apps/plugin-dialog';
-import { FolderOpen } from 'lucide-react';
+import { LuFolderOpen as FolderOpen } from 'react-icons/lu';
 import { FocusableButton } from '../layout/FocusableButton';
 
 const QUALITIES = ['360p', '480p', '720p', '1080p', '4k'];

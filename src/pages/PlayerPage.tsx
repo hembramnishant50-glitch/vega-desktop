@@ -12,7 +12,7 @@ import { LogicalSize } from '@tauri-apps/api/dpi';
 import { FocusContext, useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import { FocusableButton } from '../components/layout/FocusableButton';
 
-import { Play } from 'lucide-react';
+import { LuPlay as Play } from 'react-icons/lu';
 import './PlayerPage.css';
 
 interface PlayerLocationState {
@@ -196,9 +196,11 @@ const TvPlayer: React.FC<any> = ({
   }
 
   if (streamError) {
+    const bgUrl = state.poster?.background || state.poster?.poster;
     return (
-      <div className="player-page">
-        <div className="player-error">
+      <div className="player-page controls-visible" style={{ backgroundImage: bgUrl ? `url(${bgUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        {bgUrl && <div className="player-page-overlay" style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)' }} />}
+        <div className="player-error" style={{ background: bgUrl ? 'transparent' : '#000', zIndex: 1 }}>
           <p>{streamError.message || 'Failed to load stream'}</p>
           <FocusableButton className="action-btn primary-btn" onClick={() => navigate(-1)}>
             Go Back
@@ -376,7 +378,6 @@ const DesktopPlayer: React.FC<any> = ({
     prevStreamLinkRef.current = selectedStream.link;
 
     (async () => {
-      toast(`Loading: ${selectedStream.link}`);
       const subs = selectedStream.subtitles?.length ? selectedStream.subtitles : externalSubs;
       await mpv.loadFile(selectedStream.link, selectedStream.headers, subs);
     })();
@@ -540,9 +541,16 @@ const DesktopPlayer: React.FC<any> = ({
   }, [activeEpisodeIndex, mpv.currentTime, mpv.duration, state.episodeList.length]);
 
   if (streamLoading) {
+    const bgUrl = state.poster?.background || state.poster?.poster;
     return (
-      <div className="player-page">
-        <div className="player-loading">
+      <div className="player-page controls-visible">
+        {bgUrl && (
+          <>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: -2 }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', zIndex: -1 }} />
+          </>
+        )}
+        <div className="player-loading" style={{ background: bgUrl ? 'transparent' : '#000' }}>
           <div className="loading-spinner" />
           <span className="loading-text">Fetching stream...</span>
         </div>
@@ -551,9 +559,16 @@ const DesktopPlayer: React.FC<any> = ({
   }
 
   if (streamError) {
+    const bgUrl = state.poster?.background || state.poster?.poster;
     return (
-      <div className="player-page">
-        <div className="player-error">
+      <div className="player-page controls-visible">
+        {bgUrl && (
+          <>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: -2 }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', zIndex: -1 }} />
+          </>
+        )}
+        <div className="player-error" style={{ background: bgUrl ? 'transparent' : '#000' }}>
           <p>{streamError.message || 'Failed to load stream'}</p>
           <button onClick={() => navigate(-1)}>Go Back</button>
         </div>

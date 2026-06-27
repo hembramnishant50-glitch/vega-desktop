@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { LuChevronLeft as ChevronLeft, LuChevronRight as ChevronRight } from 'react-icons/lu';
 import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
 import { settingsStorage } from '../../lib/storage';
 import { PostCardItem, Post } from './PostCardItem';

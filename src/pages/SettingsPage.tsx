@@ -1,7 +1,7 @@
 import React from "react";
 import useThemeStore from "../lib/zustand/themeStore";
 import { themes, socialLinks } from "../lib/constants";
-import { Monitor, Check, Code } from "lucide-react";
+import { LuMonitor as Monitor, LuCheck as Check, LuCode as Code } from 'react-icons/lu';
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
 import { checkAppUpdates } from '../lib/hooks/useAppUpdater';

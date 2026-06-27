@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Blocks, ChevronDown, Check } from 'lucide-react';
+import { LuBlocks as Blocks, LuChevronDown as ChevronDown, LuCheck as Check } from 'react-icons/lu';
 import useContentStore from '../../lib/zustand/contentStore';
 import { FocusableButton } from './FocusableButton';
 import './ProviderSwitcher.css';

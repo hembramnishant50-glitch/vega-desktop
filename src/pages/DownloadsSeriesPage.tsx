@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDownloadStore, DownloadItem } from '../lib/zustand/downloadStore';
-import { Play, ArrowLeft, Trash2 } from 'lucide-react';
+import { LuPlay as Play, LuArrowLeft as ArrowLeft, LuTrash2 as Trash2 } from 'react-icons/lu';
 import { CustomSelect } from '../components/CustomSelect';
 import { FocusableButton } from '../components/layout/FocusableButton';
 import './DownloadsPage.css';

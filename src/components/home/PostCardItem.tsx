@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, X } from 'lucide-react';
+import { LuPlay as Play, LuX as X } from 'react-icons/lu';
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
 import { settingsStorage } from '../../lib/storage';
 

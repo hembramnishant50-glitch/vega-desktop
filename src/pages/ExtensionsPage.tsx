@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Blocks, Plus, Trash2, DownloadCloud, RotateCcw } from 'lucide-react';
+import { LuBlocks as Blocks, LuPlus as Plus, LuTrash2 as Trash2, LuCloudDownload as DownloadCloud, LuRotateCcw as RotateCcw } from 'react-icons/lu';
 import useContentStore from '../lib/zustand/contentStore';
 import { extensionManager } from '../lib/services/ExtensionManager';
 import { extensionStorage, ProviderSource, ProviderExtension } from '../lib/storage/extensionStorage';

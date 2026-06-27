@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useDownloadStore, DownloadItem } from '../lib/zustand/downloadStore';
-import { Play, Pause, X, Trash2, AlertCircle } from 'lucide-react';
+import { LuPlay as Play, LuPause as Pause, LuX as X, LuTrash2 as Trash2, LuCircleAlert as AlertCircle } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { FocusableButton } from '../components/layout/FocusableButton';
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';

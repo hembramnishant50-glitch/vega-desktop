@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import useWatchListStore from '../lib/zustand/watchListStore';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, BookmarkPlus, Video, Download, Loader2, BookmarkCheck, Trash2 } from 'lucide-react';
+import { LuArrowLeft as ArrowLeft, LuBookmarkPlus as BookmarkPlus, LuVideo as Video, LuDownload as Download, LuLoaderCircle as Loader2, LuBookmarkCheck as BookmarkCheck, LuTrash2 as Trash2 } from 'react-icons/lu';
 import { useContentDetails } from '../lib/hooks/useContentInfo';
 import { useEpisodes } from '../lib/hooks/useEpisodes';
 import useContentStore from '../lib/zustand/contentStore';

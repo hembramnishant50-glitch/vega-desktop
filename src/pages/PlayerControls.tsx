@@ -1,25 +1,6 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import {
-  ArrowLeft,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  Rewind,
-  FastForward,
-  Settings,
-  Maximize,
-  Minimize,
-  SkipForward as NextIcon,
-  Subtitles,
-  Gauge,
-  Volume2 as AudioIcon,
-  PictureInPicture,
-  RectangleHorizontal,
-  Check,
-  Server as ServerIcon,
-  Tv,
-} from 'lucide-react';
+import { LuArrowLeft as ArrowLeft, LuPlay as Play, LuPause as Pause, LuSkipBack as SkipBack, LuSkipForward as SkipForward, LuRewind as Rewind, LuFastForward as FastForward, LuMaximize as Maximize, LuMinimize as Minimize, LuSkipForward as NextIcon, LuCaptions as Subtitles, LuGauge as Gauge, LuPictureInPicture as PictureInPicture, LuRectangleHorizontal as RectangleHorizontal, LuCheck as Check, LuServer as ServerIcon, LuTv as Tv, LuAudioLines } from 'react-icons/lu';
+import { MdVideoSettings, Md4K, Md8K, MdHd, MdSd, MdHighQuality } from 'react-icons/md';
 import type { MpvTrack } from '../lib/hooks/useMpvPlayer';
 import { SearchSubtitlesModal } from '../components/SearchSubtitlesModal';
 
@@ -62,6 +43,30 @@ interface PlayerControlsProps {
   isCropped: boolean;
   onPlayNative?: () => void;
   isTV?: boolean;
+}
+
+function getQualityInfo(h: number, fallbackStr: string) {
+  if (h) {
+    if (h >= 3000) return { text: '8K', Icon: Md8K };
+    if (h >= 1500) return { text: '4K', Icon: Md4K };
+    if (h >= 1200) return { text: '1440p', Icon: MdHighQuality };
+    if (h >= 780) return { text: '1080p', Icon: MdHd };
+    if (h >= 500) return { text: '720p', Icon: MdHd };
+    if (h >= 400) return { text: '480p', Icon: MdSd };
+    if (h >= 300) return { text: '360p', Icon: MdSd };
+    return { text: `${Math.round(h)}p`, Icon: MdSd };
+  }
+
+  if (fallbackStr) {
+    const s = fallbackStr.toLowerCase();
+    if (s.includes('8k') || s.includes('4320')) return { text: fallbackStr, Icon: Md8K };
+    if (s.includes('4k') || s.includes('2160')) return { text: fallbackStr, Icon: Md4K };
+    if (s.includes('1440')) return { text: fallbackStr, Icon: MdHighQuality };
+    if (s.includes('1080') || s.includes('720') || s.includes('hd')) return { text: fallbackStr, Icon: MdHd };
+    if (s.includes('480') || s.includes('360') || s.includes('sd')) return { text: fallbackStr, Icon: MdSd };
+  }
+
+  return { text: fallbackStr || 'Auto', Icon: MdVideoSettings };
 }
 
 function formatTime(seconds: number): string {
@@ -207,12 +212,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     <div
       className={`player-controls-wrapper ${visible ? 'visible' : ''}`}
       onClick={onClickBackground}
+      onDoubleClick={onToggleFullscreen}
     >
       <div className="controls-gradient-top" />
       <div className="controls-gradient-bottom" />
 
       {/* Top bar */}
-      <div className="player-top-bar" onClick={stop}>
+      <div className="player-top-bar" onClick={stop} onDoubleClick={stop}>
         <button className="player-back-btn" onClick={onBack}>
           <ArrowLeft size={22} />
         </button>
@@ -225,7 +231,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </div>
 
       {/* Center play/pause + skip */}
-      <div className="player-center-controls" onClick={stop}>
+      <div className="player-center-controls" onClick={stop} onDoubleClick={stop}>
         {hasPrevEpisode && onPrevEpisode ? (
           <button className="center-btn" onClick={onPrevEpisode}>
             <SkipBack size={24} />
@@ -258,11 +264,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       </div>
 
       {/* Bottom bar */}
-      <div className="player-bottom-bar" onClick={stop}>
+      <div className="player-bottom-bar" onClick={stop} onDoubleClick={stop}>
         <div className="player-timeline">
           <span className="timeline-time">{formatTime(currentTime)}</span>
           <div ref={trackRef} className="timeline-track" onMouseDown={handleTrackMouseDown}>
-            <div className="timeline-progress" style={{ width: `${progressPercent}%` }} />
+            <div className="timeline-progress" style={{ width: `${progressPercent}%` }}>
+              <div className="timeline-thumb" />
+            </div>
           </div>
           <span className="timeline-time right">{formatTime(duration)}</span>
         </div>
@@ -271,7 +279,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           <div className="player-actions-left">
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'audio' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'audio')}>
-                <AudioIcon size={18} />
+                <LuAudioLines size={20} />
                 <span>{audioTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0, 2) || 'EN'}</span>
               </button>
               {openMenu === 'audio' && (
@@ -292,7 +300,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'subtitle' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'subtitle')}>
-                <Subtitles size={18} />
+                <Subtitles size={20} />
                 <span>{subtitleTracks.find(t => t.selected)?.lang?.toUpperCase().slice(0, 2) || 'OFF'}</span>
               </button>
               {openMenu === 'subtitle' && (
@@ -323,7 +331,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'speed' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'speed')}>
-                <Gauge size={18} />
+                <Gauge size={20} />
                 <span>{playbackRate.toFixed(1)}x</span>
               </button>
               {openMenu === 'speed' && (
@@ -342,7 +350,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
           <div className="player-actions-right">
             {onPlayNative && (
               <button className="action-btn text-btn" onClick={onPlayNative}>
-                <Tv size={18} />
+                <Tv size={20} />
                 <span>Native</span>
               </button>
             )}
@@ -354,13 +362,13 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             )}
 
             <button className={`action-btn text-btn ${isPip ? 'active' : ''}`} onClick={onTogglePip}>
-              <PictureInPicture size={18} />
+              <PictureInPicture size={20} />
               <span>PIP</span>
             </button>
 
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'server' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'server')}>
-                <ServerIcon size={18} />
+                <ServerIcon size={20} />
                 <span>{selectedStream?.server || selectedStream?.quality || 'Server'}</span>
               </button>
               {openMenu === 'server' && (
@@ -387,14 +395,19 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
             <div className="inline-menu-container">
               <button className={`action-btn text-btn ${openMenu === 'quality' ? 'active' : ''}`} onClick={(e) => toggleMenu(e, 'quality')}>
-                <Settings size={18} />
-                <span>{(() => {
+                {(() => {
                   const sel = videoTracks.find(t => t.selected);
-                  if (!sel) return 'Auto';
-                  const h = sel.demuxH || (sel.selected ? videoHeight : 0);
-                  const fallback = selectedStream?.quality ? selectedStream.quality : (sel.title || sel.codec?.split(' ')[0] || 'Auto');
-                  return h ? `${Math.round(h)}p` : fallback;
-                })()}</span>
+                  const h = sel ? (sel.demuxH || (sel.selected ? videoHeight : 0)) : 0;
+                  const fallback = sel ? (selectedStream?.quality ? selectedStream.quality : (sel.title || sel.codec?.split(' ')[0] || 'Auto')) : 'Auto';
+                  const info = getQualityInfo(h, fallback);
+                  const QualityIcon = (!sel) ? MdVideoSettings : info.Icon;
+                  return (
+                    <>
+                      <QualityIcon size={20} />
+                      <span>{info.text}</span>
+                    </>
+                  );
+                })()}
               </button>
               {openMenu === 'quality' && (
                 <div className="inline-menu right wide" onClick={stop}>
@@ -405,7 +418,8 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                   {videoTracks.map(t => {
                     const h = t.demuxH || (t.selected ? videoHeight : 0);
                     const fallback = (t.selected && selectedStream?.quality) ? selectedStream.quality : (t.title || t.codec || `Track ${t.id}`);
-                    const primary = h ? `${Math.round(h)}p` : fallback;
+                    const info = getQualityInfo(h, fallback);
+                    const primary = info.text;
                     const secondary = (h || (t.selected && selectedStream?.quality)) ? (t.title || t.codec) : null;
                     return (
                       <button key={t.id} className={`inline-menu-item ${t.selected ? 'selected' : ''}`} onClick={() => { onSelectVideoTrack(t.id); setOpenMenu(null); }}>
@@ -422,14 +436,14 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
             </div>
 
             <button className={`action-btn text-btn ${isCropped ? 'active' : ''}`} onClick={onToggleCrop}>
-              <RectangleHorizontal size={18} />
+              <RectangleHorizontal size={20} />
               <span style={{ display: 'inline-block', minWidth: '32px', textAlign: 'left' }}>
                 {isCropped ? 'Crop' : 'Fit'}
               </span>
             </button>
 
             <button className="action-btn text-btn" onClick={onToggleFullscreen}>
-              {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
           </div>
         </div>

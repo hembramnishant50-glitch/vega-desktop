@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play } from 'lucide-react';
+import { LuPlay as Play } from 'react-icons/lu';
 import { useHeroMetadata } from '../../lib/hooks/useHomePageData';
 import { useNavigate } from 'react-router-dom';
 import useContentStore from '../../lib/zustand/contentStore';

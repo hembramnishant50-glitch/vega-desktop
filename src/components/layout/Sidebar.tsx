@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Search, Bookmark, Settings, Blocks, Download } from 'lucide-react';
+import { LuHouse as Home, LuSearch as Search, LuBookmark as Bookmark, LuSettings as Settings, LuBlocks as Blocks, LuDownload as Download } from 'react-icons/lu';
 import { FocusableNavLink } from './FocusableNavLink';
 import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
 import { settingsStorage } from '../../lib/storage';

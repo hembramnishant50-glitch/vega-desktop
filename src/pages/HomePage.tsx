@@ -5,7 +5,7 @@ import { useSearch } from '../lib/hooks/useSearch';
 import useContentStore from '../lib/zustand/contentStore';
 import { Hero } from '../components/home/Hero';
 import { ContentSlider } from '../components/home/ContentSlider';
-import { RefreshCw, Play, Loader2 } from 'lucide-react';
+import { LuRefreshCw as RefreshCw, LuPlay as Play, LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import useWatchHistoryStore from '../lib/zustand/watchHistrory';
 import { FocusableButton } from '../components/layout/FocusableButton';
 import './HomePage.css';
