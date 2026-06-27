@@ -231,13 +231,23 @@ export const ExtensionsPage: React.FC = () => {
                 </FocusableButton>
 
                 {activeSource?.author === source.author && (
-                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: '16px', gap: '8px' }}>
                     <FocusableButton
                       className="icon-btn"
                       onClick={(e: any) => { e.stopPropagation(); refreshManifest(source); }}
                       disabled={isLoading}
                     >
                       <RotateCcw size={20} className={isLoading ? 'spin' : ''} />
+                    </FocusableButton>
+                    <FocusableButton
+                      className="icon-btn text-error"
+                      onClick={(e: any) => { 
+                        e.stopPropagation(); 
+                        extensionStorage.removeProviderSource(source.author);
+                        loadSources();
+                      }}
+                    >
+                      <Trash2 size={20} />
                     </FocusableButton>
                   </div>
                 )}
