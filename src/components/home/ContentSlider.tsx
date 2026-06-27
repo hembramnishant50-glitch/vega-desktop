@@ -1,10 +1,16 @@
-import React, { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LuChevronLeft as ChevronLeft, LuChevronRight as ChevronRight } from 'react-icons/lu';
-import { useFocusable, FocusContext } from '@noriginmedia/norigin-spatial-navigation-react';
-import { settingsStorage } from '../../lib/storage';
-import { PostCardItem, Post } from './PostCardItem';
-import './ContentSlider.css';
+import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  LuChevronLeft as ChevronLeft,
+  LuChevronRight as ChevronRight,
+} from "react-icons/lu";
+import {
+  useFocusable,
+  FocusContext,
+} from "@noriginmedia/norigin-spatial-navigation-react";
+import { settingsStorage } from "../../lib/storage";
+import { PostCardItem, Post } from "./PostCardItem";
+import "./ContentSlider.css";
 
 interface ContentSliderProps {
   title: string;
@@ -14,23 +20,35 @@ interface ContentSliderProps {
   onRemove?: (post: Post, e: React.MouseEvent) => void;
 }
 
-export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLoading, providerValue, onRemove }) => {
+export const ContentSlider: React.FC<ContentSliderProps> = ({
+  title,
+  posts,
+  isLoading,
+  providerValue,
+  onRemove,
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const tvMode = settingsStorage.isTvModeEnabled();
 
-  const { ref: focusRef, focusKey, hasFocusedChild } = useFocusable({
+  const {
+    ref: focusRef,
+    focusKey,
+    hasFocusedChild,
+  } = useFocusable({
     focusable: tvMode,
-    trackChildren: true
+    trackChildren: true,
   });
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  const handleScroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const scrollAmount = scrollRef.current.clientWidth * 0.8;
-      const targetScroll = scrollRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+      const targetScroll =
+        scrollRef.current.scrollLeft +
+        (direction === "left" ? -scrollAmount : scrollAmount);
       scrollRef.current.scrollTo({
         left: targetScroll,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };
@@ -38,20 +56,20 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
   const handlePostClick = (post: Post) => {
     const finalProvider = post.providerValue || providerValue;
 
-    if (finalProvider === 'local') {
-      if (post.type === 'series') {
+    if (finalProvider === "local") {
+      if (post.type === "series") {
         navigate(`/downloads/series/${encodeURIComponent(post.title)}`);
       } else {
-        navigate('/downloads');
+        navigate("/downloads");
       }
       return;
     }
 
     let url = `/content/${encodeURIComponent(post.link)}`;
     const params = new URLSearchParams();
-    if (finalProvider) params.append('provider', finalProvider);
-    if (post.image) params.append('poster', post.image);
-    
+    if (finalProvider) params.append("provider", finalProvider);
+    if (post.image) params.append("poster", post.image);
+
     const queryString = params.toString();
     if (queryString) {
       url += `?${queryString}`;
@@ -62,9 +80,12 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
   if (isLoading) {
     return (
       <div className="slider-container">
-        <h2 className="slider-title headline-md skeleton-text" />
+        <h2
+          className="slider-title headline-md skeleton-text"
+          style={{ width: "200px" }}
+        />
         <div className="slider-row skeleton-row">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <div key={i} className="post-card skeleton-card" />
           ))}
         </div>
@@ -78,13 +99,16 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
 
   return (
     <FocusContext.Provider value={focusKey}>
-      <div className={`slider-container ${hasFocusedChild ? 'has-focused-child' : ''}`} ref={focusRef as any}>
+      <div
+        className={`slider-container ${hasFocusedChild ? "has-focused-child" : ""}`}
+        ref={focusRef as any}
+      >
         <h2 className="slider-title headline-md">{title}</h2>
-        
+
         <div className="slider-wrapper">
-          <button 
-            className="slider-arrow left glass-overlay" 
-            onClick={() => handleScroll('left')}
+          <button
+            className="slider-arrow left glass-overlay"
+            onClick={() => handleScroll("left")}
             aria-label="Scroll left"
           >
             <ChevronLeft size={32} />
@@ -92,18 +116,18 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
 
           <div className="slider-row" ref={scrollRef}>
             {posts.map((post, index) => (
-              <PostCardItem 
-                key={`${post.link}-${index}`} 
-                post={post} 
-                onClick={handlePostClick} 
-                onRemove={onRemove} 
+              <PostCardItem
+                key={`${post.link}-${index}`}
+                post={post}
+                onClick={handlePostClick}
+                onRemove={onRemove}
               />
             ))}
           </div>
 
-          <button 
-            className="slider-arrow right glass-overlay" 
-            onClick={() => handleScroll('right')}
+          <button
+            className="slider-arrow right glass-overlay"
+            onClick={() => handleScroll("right")}
             aria-label="Scroll right"
           >
             <ChevronRight size={32} />
@@ -113,4 +137,3 @@ export const ContentSlider: React.FC<ContentSliderProps> = ({ title, posts, isLo
     </FocusContext.Provider>
   );
 };
-
