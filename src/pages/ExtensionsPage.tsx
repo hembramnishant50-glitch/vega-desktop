@@ -328,7 +328,7 @@ export const ExtensionsPage: React.FC = () => {
                       {provider.icon ? (
                         <img src={provider.icon} alt={provider.display_name} />
                       ) : (
-                        <Blocks />
+                        <Blocks size={25} />
                       )}
                     </div>
                     <div>
@@ -387,7 +387,7 @@ export const ExtensionsPage: React.FC = () => {
                             alt={provider.display_name}
                           />
                         ) : (
-                          <Blocks />
+                          <Blocks size={25} />
                         )}
                       </div>
                       <div>
