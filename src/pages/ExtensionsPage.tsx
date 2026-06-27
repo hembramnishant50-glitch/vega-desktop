@@ -1,14 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { LuBlocks as Blocks, LuPlus as Plus, LuTrash2 as Trash2, LuCloudDownload as DownloadCloud, LuRotateCcw as RotateCcw } from 'react-icons/lu';
-import useContentStore from '../lib/zustand/contentStore';
-import { extensionManager } from '../lib/services/ExtensionManager';
-import { extensionStorage, ProviderSource, ProviderExtension } from '../lib/storage/extensionStorage';
-import { createProviderSource } from '../lib/utils/helpers';
-import { FocusableButton } from '../components/layout/FocusableButton';
-import { useFocusable } from '@noriginmedia/norigin-spatial-navigation-react';
-import { resume } from '@noriginmedia/norigin-spatial-navigation-core';
-import { settingsStorage } from '../lib/storage';
-import './ExtensionsPage.css';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  LuBlocks as Blocks,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuCloudDownload as DownloadCloud,
+  LuRotateCcw as RotateCcw,
+} from "react-icons/lu";
+import useContentStore from "../lib/zustand/contentStore";
+import { extensionManager } from "../lib/services/ExtensionManager";
+import {
+  extensionStorage,
+  ProviderSource,
+  ProviderExtension,
+} from "../lib/storage/extensionStorage";
+import { createProviderSource } from "../lib/utils/helpers";
+import { FocusableButton } from "../components/layout/FocusableButton";
+import { useFocusable } from "@noriginmedia/norigin-spatial-navigation-react";
+import { resume } from "@noriginmedia/norigin-spatial-navigation-core";
+import { settingsStorage } from "../lib/storage";
+import "./ExtensionsPage.css";
 
 const ExtensionInput: React.FC<{
   focusKey?: string;
@@ -20,12 +30,16 @@ const ExtensionInput: React.FC<{
   const [isTyping, setIsTyping] = useState(false);
   const nativeInputRef = useRef<HTMLInputElement>(null);
 
-  const { ref: focusRef, focused, focusSelf } = useFocusable({
+  const {
+    ref: focusRef,
+    focused,
+    focusSelf,
+  } = useFocusable({
     focusable: tvMode,
     focusKey,
     onArrowPress: (direction) => {
       // Prevent focus from flying off screen upwards since there's no topbar here
-      if (direction === 'up') return false;
+      if (direction === "up") return false;
       return true;
     },
     onEnterPress: () => {
@@ -33,7 +47,7 @@ const ExtensionInput: React.FC<{
       setTimeout(() => {
         nativeInputRef.current?.focus();
       }, 50);
-    }
+    },
   });
 
   const handleInputBlur = () => {
@@ -48,8 +62,17 @@ const ExtensionInput: React.FC<{
     <div
       // @ts-ignore
       ref={focusRef}
-      className={`input-wrapper ${focused ? 'tv-focus' : ''}`}
-      style={{ flex: 1, display: 'flex', background: 'transparent', border: 'none', padding: 0, margin: 0, outline: 'none', cursor: 'text' }}
+      className={`input-wrapper ${focused ? "tv-focus" : ""}`}
+      style={{
+        flex: 1,
+        display: "flex",
+        background: "transparent",
+        border: "none",
+        padding: 0,
+        margin: 0,
+        outline: "none",
+        cursor: "text",
+      }}
       onClick={() => {
         setIsTyping(true);
         setTimeout(() => nativeInputRef.current?.focus(), 50);
@@ -66,11 +89,15 @@ const ExtensionInput: React.FC<{
         onBlur={handleInputBlur}
         onKeyDown={(e) => {
           if (isTyping) {
-            if (e.key === 'Escape' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (
+              e.key === "Escape" ||
+              e.key === "ArrowDown" ||
+              e.key === "ArrowUp"
+            ) {
               e.stopPropagation();
               e.preventDefault();
               nativeInputRef.current?.blur();
-            } else if (e.key === 'Enter') {
+            } else if (e.key === "Enter") {
               e.stopPropagation();
               e.preventDefault();
               nativeInputRef.current?.blur();
@@ -83,7 +110,13 @@ const ExtensionInput: React.FC<{
           }
         }}
         className="input-field"
-        style={{ width: '100%', outline: 'none', background: 'transparent', border: 'none', color: 'inherit' }}
+        style={{
+          width: "100%",
+          outline: "none",
+          background: "transparent",
+          border: "none",
+          color: "inherit",
+        }}
       />
     </div>
   );
@@ -96,14 +129,14 @@ export const ExtensionsPage: React.FC = () => {
     setInstalledProviders,
     setAvailableProviders,
     provider: activeProvider,
-    setProvider
+    setProvider,
   } = useContentStore();
 
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [sources, setSources] = useState<ProviderSource[]>([]);
   const [activeSource, setActiveSource] = useState<ProviderSource | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const tvMode = settingsStorage.isTvModeEnabled();
 
@@ -125,11 +158,11 @@ export const ExtensionsPage: React.FC = () => {
   const refreshManifest = async (source: ProviderSource) => {
     try {
       setIsLoading(true);
-      setError('');
+      setError("");
       const providers = await extensionManager.fetchManifest(source, true);
       setAvailableProviders(providers);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch manifest');
+      setError(err.message || "Failed to fetch manifest");
     } finally {
       setIsLoading(false);
     }
@@ -137,17 +170,20 @@ export const ExtensionsPage: React.FC = () => {
 
   const handleAddSource = () => {
     if (!inputValue.trim()) {
-      setError('Enter a valid source URL or GitHub author.');
+      setError("Enter a valid source URL or GitHub author.");
       return;
     }
     try {
       const parsedSource = createProviderSource(inputValue);
-      extensionStorage.addProviderSources(parsedSource.author, parsedSource.url);
+      extensionStorage.addProviderSources(
+        parsedSource.author,
+        parsedSource.url,
+      );
       extensionStorage.setDefaultProviderSource(parsedSource.author);
-      setInputValue('');
+      setInputValue("");
       loadSources();
     } catch (err: any) {
-      setError(err.message || 'Enter a valid source URL or GitHub author.');
+      setError(err.message || "Enter a valid source URL or GitHub author.");
     }
   };
 
@@ -182,7 +218,7 @@ export const ExtensionsPage: React.FC = () => {
     <div className="extensions-page">
       <div className="page-header">
         <div className="page-header-icon">
-          <Blocks size={36} />
+          <Blocks size={40} />
         </div>
         <div className="page-header-content">
           <h1 className="display-lg">Extensions</h1>
@@ -190,11 +226,7 @@ export const ExtensionsPage: React.FC = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="error-banner">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-banner">{error}</div>}
 
       <div className="sources-section glass-overlay">
         <h2 className="headline-md">Provider Sources</h2>
@@ -213,14 +245,21 @@ export const ExtensionsPage: React.FC = () => {
 
         {sources.length > 0 && (
           <div className="source-list">
-            {sources.map(source => (
+            {sources.map((source) => (
               <div
                 key={source.author}
-                className={`source-card ${activeSource?.author === source.author ? 'active' : ''}`}
-                style={{ display: 'flex', padding: 0, overflow: 'hidden' }}
+                className={`source-card ${activeSource?.author === source.author ? "active" : ""}`}
+                style={{ display: "flex", padding: 0, overflow: "hidden" }}
               >
                 <FocusableButton
-                  style={{ flex: 1, textAlign: 'left', padding: '16px', background: 'transparent', border: 'none', color: 'inherit' }}
+                  style={{
+                    flex: 1,
+                    textAlign: "left",
+                    padding: "16px",
+                    background: "transparent",
+                    border: "none",
+                    color: "inherit",
+                  }}
                   onClick={() => {
                     extensionStorage.setDefaultProviderSource(source.author);
                     loadSources();
@@ -231,18 +270,31 @@ export const ExtensionsPage: React.FC = () => {
                 </FocusableButton>
 
                 {activeSource?.author === source.author && (
-                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: '16px', gap: '8px' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      paddingRight: "16px",
+                      gap: "8px",
+                    }}
+                  >
                     <FocusableButton
                       className="icon-btn"
-                      onClick={(e: any) => { e.stopPropagation(); refreshManifest(source); }}
+                      onClick={(e: any) => {
+                        e.stopPropagation();
+                        refreshManifest(source);
+                      }}
                       disabled={isLoading}
                     >
-                      <RotateCcw size={20} className={isLoading ? 'spin' : ''} />
+                      <RotateCcw
+                        size={20}
+                        className={isLoading ? "spin" : ""}
+                      />
                     </FocusableButton>
                     <FocusableButton
                       className="icon-btn text-error"
-                      onClick={(e: any) => { 
-                        e.stopPropagation(); 
+                      onClick={(e: any) => {
+                        e.stopPropagation();
                         extensionStorage.removeProviderSource(source.author);
                         loadSources();
                       }}
@@ -264,66 +316,100 @@ export const ExtensionsPage: React.FC = () => {
             {installedProviders.length === 0 && (
               <p className="text-muted body-md">No providers installed yet.</p>
             )}
-            {installedProviders.filter(p => !p.disabled).map(provider => (
-              <div key={provider.value} className="provider-card installed glass-overlay">
-                <div className="provider-info">
-                  <div className="provider-icon">
-                    {provider.icon ? <img src={provider.icon} alt={provider.display_name} /> : <Blocks />}
+            {installedProviders
+              .filter((p) => !p.disabled)
+              .map((provider) => (
+                <div
+                  key={provider.value}
+                  className="provider-card installed glass-overlay"
+                >
+                  <div className="provider-info">
+                    <div className="provider-icon">
+                      {provider.icon ? (
+                        <img src={provider.icon} alt={provider.display_name} />
+                      ) : (
+                        <Blocks />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="body-lg">{provider.display_name}</h3>
+                      <p className="label-md text-muted">
+                        v{provider.version} • {provider.type}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="body-lg">{provider.display_name}</h3>
-                    <p className="label-md text-muted">v{provider.version} • {provider.type}</p>
-                  </div>
-                </div>
-                <div className="provider-actions">
-                  {activeProvider?.value === provider.value ? (
-                    <span className="badge active">Active</span>
-                  ) : (
-                    <FocusableButton className="btn-secondary" onClick={() => setProvider(provider)}>
-                      Set Active
+                  <div className="provider-actions">
+                    {activeProvider?.value === provider.value ? (
+                      <span className="badge active">Active</span>
+                    ) : (
+                      <FocusableButton
+                        className="btn-secondary"
+                        onClick={() => setProvider(provider)}
+                      >
+                        Set Active
+                      </FocusableButton>
+                    )}
+                    <FocusableButton
+                      className="icon-btn danger"
+                      onClick={() =>
+                        handleUninstall(provider.value, provider.source.author)
+                      }
+                    >
+                      <Trash2 size={20} />
                     </FocusableButton>
-                  )}
-                  <FocusableButton className="icon-btn danger" onClick={() => handleUninstall(provider.value, provider.source.author)}>
-                    <Trash2 size={20} />
-                  </FocusableButton>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         <div className="providers-column">
           <h2 className="headline-md mb-md">Available</h2>
           <div className="provider-list">
-            {availableProviders.filter(p => !p.disabled).map(provider => {
-              const isInstalled = installedProviders.some(p => p.value === provider.value);
-              if (isInstalled) return null;
+            {availableProviders
+              .filter((p) => !p.disabled)
+              .map((provider) => {
+                const isInstalled = installedProviders.some(
+                  (p) => p.value === provider.value,
+                );
+                if (isInstalled) return null;
 
-              return (
-                <div key={provider.value} className="provider-card available glass-overlay">
-                  <div className="provider-info">
-                    <div className="provider-icon">
-                      {provider.icon ? <img src={provider.icon} alt={provider.display_name} /> : <Blocks />}
-                    </div>
-                    <div>
-                      <h3 className="body-lg">{provider.display_name}</h3>
-                      <p className="label-md text-muted">v{provider.version} • {provider.type}</p>
-                    </div>
-                  </div>
-                  <FocusableButton
-                    className="btn-primary"
-                    onClick={() => handleInstall(provider)}
-                    disabled={isLoading}
+                return (
+                  <div
+                    key={provider.value}
+                    className="provider-card available glass-overlay"
                   >
-                    <DownloadCloud size={20} /> Install
-                  </FocusableButton>
-                </div>
-              );
-            })}
+                    <div className="provider-info">
+                      <div className="provider-icon">
+                        {provider.icon ? (
+                          <img
+                            src={provider.icon}
+                            alt={provider.display_name}
+                          />
+                        ) : (
+                          <Blocks />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="body-lg">{provider.display_name}</h3>
+                        <p className="label-md text-muted">
+                          v{provider.version} • {provider.type}
+                        </p>
+                      </div>
+                    </div>
+                    <FocusableButton
+                      className="btn-primary"
+                      onClick={() => handleInstall(provider)}
+                      disabled={isLoading}
+                    >
+                      <DownloadCloud size={20} /> Install
+                    </FocusableButton>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>
     </div>
   );
 };
-

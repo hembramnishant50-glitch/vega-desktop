@@ -217,16 +217,19 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
+  opacity: 0 !important;
   transition: opacity 0.2s, background 0.2s;
 }
 
-.completed-card:hover .delete-btn {
-  opacity: 1;
+.completed-card:hover .delete-btn,
+.completed-card:focus-within .delete-btn {
+  opacity: 1 !important;
 }
 
 .delete-btn:hover {
-  background: #ef4444;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  transform: scale(1.1);
 }
 
 .empty-state {
