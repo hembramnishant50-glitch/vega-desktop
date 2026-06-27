@@ -20,7 +20,7 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
   const { provider } = useContentStore();
   const tvMode = settingsStorage.isTvModeEnabled();
 
-  const { data: meta } = useHeroMetadata(
+  const { data: meta, isLoading: metaLoading } = useHeroMetadata(
     post?.link || '',
     provider?.value || ''
   );
@@ -39,10 +39,24 @@ export const Hero: React.FC<HeroProps> = ({ post }) => {
     }
   });
 
-  if (!post) {
+  if (!post || metaLoading) {
     return (
       <div className="hero-container skeleton">
-        <div className="hero-skeleton-bg" />
+        {post ? (
+          <div
+            className="hero-background"
+            style={{ backgroundImage: `url(${post.image})` }}
+          />
+        ) : (
+          <div className="hero-skeleton-bg" />
+        )}
+        <div className="hero-vignette" />
+        <div className="hero-content">
+          <div className="skeleton-title" style={{ width: '60%', height: '48px', marginBottom: '16px' }} />
+          <div className="skeleton-text" style={{ width: '80%', height: '24px', marginBottom: '8px' }} />
+          <div className="skeleton-text" style={{ width: '70%', height: '24px', marginBottom: '24px' }} />
+          <div className="skeleton-button" style={{ width: '120px', height: '48px', borderRadius: '12px' }} />
+        </div>
       </div>
     );
   }
