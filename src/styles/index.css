@@ -28,6 +28,10 @@
   background: var(--primary);
 }
 
+html, body {
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   font-family: var(--font-family);
