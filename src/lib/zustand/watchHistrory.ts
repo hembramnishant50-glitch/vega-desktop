@@ -36,11 +36,12 @@ const useWatchHistoryStore = create<History>(set => ({
         provider: item.provider,
         link: item.link,
         timestamp: Date.now(),
-        duration: item.duration,
-        progress: item.currentTime,
         episodeTitle: item.episodeTitle,
         cachedInfoData: item.cachedInfoData,
       };
+      
+      if (item.duration !== undefined) storageItem.duration = item.duration;
+      if (item.currentTime !== undefined) storageItem.progress = item.currentTime;
 
       // Add to storage
       watchHistoryStorage.addToWatchHistory(storageItem);

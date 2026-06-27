@@ -154,8 +154,6 @@ const TvPlayer: React.FC<any> = ({
         link: state.infoUrl || '',
         provider: state.providerValue || '',
         lastPlayed: Date.now(),
-        duration: 0,
-        currentTime: 0,
         playbackRate: 1,
         episodeTitle: state.secondaryTitle,
       });
@@ -398,8 +396,6 @@ const DesktopPlayer: React.FC<any> = ({
       link: state.infoUrl || '',
       provider: state.providerValue || provider?.value || '',
       lastPlayed: Date.now(),
-      duration: 0,
-      currentTime: 0,
       playbackRate: 1,
       episodeTitle: state.secondaryTitle,
     });
