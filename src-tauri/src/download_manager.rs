@@ -434,8 +434,8 @@ pub async fn download_m3u8(
             
             let mut pt = seg_data.clone();
             
-            let key_arr: &[u8; 16] = key[0..16].try_into().map_err(|e| "Invalid key length")?;
-            let iv_arr: &[u8; 16] = iv[0..16].try_into().map_err(|e| "Invalid IV length")?;
+            let key_arr: &[u8; 16] = key[0..16].try_into().map_err(|_| "Invalid key length")?;
+            let iv_arr: &[u8; 16] = iv[0..16].try_into().map_err(|_| "Invalid IV length")?;
             
             decrypted_vec = Aes128CbcDec::new(key_arr.into(), iv_arr.into())
                 .decrypt_padded::<Pkcs7>(&mut pt)

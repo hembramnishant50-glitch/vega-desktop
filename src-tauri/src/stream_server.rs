@@ -188,13 +188,11 @@ async fn handle_segment(
     let mut data = bytes.to_vec();
 
     // Scan for the first valid MPEG-TS packet (starts with 0x47 and has another 0x47 188 bytes later)
-    let mut stripped = false;
     for i in 0..data.len() {
         if data[i] == 0x47 && i + 188 < data.len() && data[i + 188] == 0x47 {
             if i > 0 {
                 data = data[i..].to_vec();
             }
-            stripped = true;
             break;
         }
     }
