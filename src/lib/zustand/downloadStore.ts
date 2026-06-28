@@ -16,6 +16,9 @@ export interface DownloadItem {
   url: string;
   poster?: string;
   provider?: string;
+  headers?: Record<string, string>;
+  subtitles?: { url: string; language: string; format?: string }[];
+  videoType?: string | null;
   filePath: string;
   totalBytes: number;
   downloadedBytes: number;
@@ -43,23 +46,22 @@ export const useDownloadStore = create<DownloadState>()(
 
         addDownload: async (item) => {
           const id = item.id;
-          
+
           // Determine save path
           const customDir = settingsStorage.getDownloadLocation();
           const baseDir = customDir === 'vega' ? await join(await documentDir(), 'VegaDownloads') : customDir;
-          
+
           const cleanName = item.showName || item.title;
           const safeTitle = cleanName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-          
-          // For series, save inside a folder
+
+          // Always create a folder for the show/movie
+          const safeDir = await join(baseDir, safeTitle);
           let filePath;
           if (item.type === 'series') {
-
             const epFile = (item.episodeName || item.id).replace(/[^a-z0-9]/gi, '_');
-            const safeDir = await join(baseDir, safeTitle);
             filePath = await join(safeDir, `${epFile}.mp4`);
           } else {
-            filePath = await join(baseDir, `${safeTitle}.mp4`);
+            filePath = await join(safeDir, `${safeTitle}.mp4`);
           }
 
           const newItem: DownloadItem = {
@@ -76,11 +78,38 @@ export const useDownloadStore = create<DownloadState>()(
           }));
 
           try {
+            // Download subtitles first
+            if (item.subtitles && item.subtitles.length > 0) {
+              const { fetch } = await import('@tauri-apps/plugin-http');
+
+              const baseName = filePath.substring(0, filePath.lastIndexOf('.'));
+
+              let subIdx = 0;
+              for (const sub of item.subtitles) {
+                try {
+                  const ext = sub.format || (sub.url.endsWith('.srt') ? 'srt' : 'vtt');
+                  const subPath = `${baseName}.${sub.language || 'unk'}_${subIdx}.${ext}`;
+                  subIdx++;
+
+                  const response = await fetch(sub.url);
+                  if (response.ok) {
+                    const text = await response.text();
+                    await invoke('save_subtitle', { path: subPath, content: text });
+                  }
+                } catch (subErr) {
+                  console.error('Failed to download subtitle:', subErr);
+                }
+              }
+            }
+
             await invoke('start_download', {
               id,
               url: item.url,
-              filePath
+              filePath,
+              headers: item.headers || null,
+              videoType: item.videoType || (item.url.includes('.m3u8') ? 'm3u8' : null)
             });
+
           } catch (e) {
             console.error('Failed to start download:', e);
             get().markError(id);
@@ -112,7 +141,9 @@ export const useDownloadStore = create<DownloadState>()(
             await invoke('start_download', {
               id,
               url: item.url,
-              filePath: item.filePath
+              filePath: item.filePath,
+              headers: item.headers || null,
+              videoType: item.videoType || (item.url.includes('.m3u8') ? 'm3u8' : null)
             });
           } catch (e) {
             console.error('Failed to resume download:', e);
@@ -196,14 +227,31 @@ let initialized = false;
 export function initDownloadListeners() {
   if (initialized) return;
   initialized = true;
-  
+
   listen('download-progress', (event: any) => {
     const { id, downloaded, total, speed } = event.payload;
     useDownloadStore.getState().updateProgress(id, downloaded, total, speed);
   });
 
   listen('download-complete', (event: any) => {
-    const id = event.payload;
+    // Check if the payload is an object (new format) or a string (old format fallback)
+    const payload = event.payload;
+    const id = typeof payload === 'string' ? payload : payload.id;
+
+    // If we have a final_path from the backend, update the state
+    if (typeof payload === 'object' && payload.final_path) {
+      useDownloadStore.setState((state) => {
+        const item = state.downloads[id];
+        if (!item) return state;
+        return {
+          downloads: {
+            ...state.downloads,
+            [id]: { ...item, filePath: payload.final_path }
+          }
+        };
+      });
+    }
+
     useDownloadStore.getState().markCompleted(id);
   });
 }

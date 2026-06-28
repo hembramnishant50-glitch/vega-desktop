@@ -61,7 +61,27 @@ export const useStream = ({
       const downloadedItem = downloads[id];
       let localStream: Stream | null = null;
       if (downloadedItem && downloadedItem.status === 'completed') {
-        localStream = { server: 'Local File', link: downloadedItem.filePath, type: 'mp4' };
+        let subtitles: any[] = [];
+        try {
+          const { readDir } = await import('@tauri-apps/plugin-fs');
+          const filePath = downloadedItem.filePath;
+          const slashIdx = filePath.lastIndexOf('\\') !== -1 ? filePath.lastIndexOf('\\') : filePath.lastIndexOf('/');
+          const dirPath = filePath.substring(0, slashIdx);
+          const baseName = filePath.substring(slashIdx + 1, filePath.lastIndexOf('.'));
+          
+          const files = await readDir(dirPath);
+          for (const f of files) {
+            if (f.name && f.name.startsWith(baseName + '.') && (f.name.endsWith('.vtt') || f.name.endsWith('.srt'))) {
+              const langPart = f.name.substring(baseName.length + 1, f.name.lastIndexOf('.'));
+              const fullPath = (dirPath.endsWith('\\') || dirPath.endsWith('/')) ? dirPath + f.name : dirPath + '/' + f.name;
+              subtitles.push({ url: fullPath, language: langPart });
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load local subtitles:', e);
+        }
+
+        localStream = { server: 'Local File', link: downloadedItem.filePath, type: 'mp4', subtitles };
       }
 
       // Fetch streams from provider

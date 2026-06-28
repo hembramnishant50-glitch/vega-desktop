@@ -26,6 +26,9 @@
     "active": true,
     "targets": "all",
     "createUpdaterArtifacts": true,
+    "macOS": {
+      "frameworks": []
+    },
     "linux": {
       "deb": {
         "depends": ["libmpv2", "mpv"]

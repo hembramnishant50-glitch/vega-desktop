@@ -366,8 +366,15 @@ export const MetaPage: React.FC = () => {
       episodeName: dialogContext.episodeName,
       seasonTitle: dialogContext.seasonTitle,
       type: dialogContext.type,
-      imdbId: dialogContext.imdbId
-    });
+      imdbId: dialogContext.imdbId,
+      headers: stream.headers,
+      subtitles: stream.subtitles?.map(s => ({
+        url: s.uri || (s as any).url,
+        language: s.language || 'Unknown',
+        format: s.type === 'text/vtt' ? 'vtt' : 'srt'
+      })),
+      videoType: stream.type === 'm3u8' || stream.type === 'hls' ? 'm3u8' : undefined
+    } as any);
 
     // Clear context
     setDialogContext(null);

@@ -131,6 +131,7 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
             'sub-shadow-offset': '1',
             'sub-margin-y': (settingsStorage.getSubtitleBottomPadding() || 36).toString(),
             'sub-ass-override': 'force',
+            'demuxer-lavf-o': 'fflags=+genpts',
           };
 
           if (hwAccel) {
@@ -207,11 +208,16 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
           }
 
           if (pendingSubsRef.current && pendingSubsRef.current.length > 0) {
-            setTimeout(() => {
+            setTimeout(async () => {
               for (const sub of pendingSubsRef.current) {
-                const subUrl = sub.uri || sub.url;
+                let subUrl = sub.uri || sub.url;
                 if (subUrl) {
-                  command('sub-add', [subUrl, 'auto', sub.title || sub.language || 'External']).catch(console.error);
+                  subUrl = subUrl.replace(/\\/g, '/');
+                  try {
+                    await command('sub-add', [subUrl, 'auto', sub.title || sub.language || 'External']);
+                  } catch (e) {
+                    console.error('Failed to add sub:', e);
+                  }
                 }
               }
               pendingSubsRef.current = [];
@@ -313,7 +319,6 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
       } else {
         await setProperty('referrer', '').catch(console.error);
       }
-
       await command('loadfile', [url]);
     } catch (err: any) {
       if (String(err).includes('instance not found')) return;
@@ -345,7 +350,8 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
   const setVolumeLevel = useCallback(async (level: number) => {
     if (!isInitialized) return;
     try {
-      await setProperty('volume', Math.max(0, Math.min(150, level)));
+      const vol = Math.max(0, Math.min(150, level));
+      await setProperty('volume', vol.toString());
     } catch (err) {
       console.error('Failed to set volume:', err);
     }
@@ -354,7 +360,7 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
   const setPlaybackSpeed = useCallback(async (rate: number) => {
     if (!isInitialized) return;
     try {
-      await setProperty('speed', rate);
+      await setProperty('speed', rate.toString());
     } catch (err) {
       console.error('Failed to set speed:', err);
     }

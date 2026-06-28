@@ -325,9 +325,7 @@ const DesktopPlayer: React.FC<any> = ({
   }, [activeEpisodeIndex, toast, setActiveEpisodeIndex]);
 
   const mpv = useMpvPlayer({
-    onEof: () => {
-      if (activeEpisodeIndex < state.episodeList.length - 1) handleNextEpisode();
-    },
+
     onFileLoaded: () => {
       const uniqueEpisodeKey = `resume_${routeParams?.primaryTitle}_${routeParams?.secondaryTitle}_${activeEpisodeIndex}`;
       console.log('uniqueEpisodeKey', uniqueEpisodeKey);
