@@ -1,10 +1,23 @@
 mod cookie_manager;
 mod download_manager;
+mod stream_server;
+
+use std::sync::Mutex;
+use tauri::Manager;
+
+struct ProxyState {
+    port: Mutex<Option<u16>>,
+}
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+#[tauri::command]
+fn get_stream_proxy_port(state: tauri::State<'_, ProxyState>) -> Option<u16> {
+    *state.port.lock().unwrap()
 }
 
 #[tauri::command]
@@ -55,9 +68,28 @@ pub fn run() {
     }
 
     builder
+        .manage(ProxyState { port: Mutex::new(None) })
         .manage(download_manager::DownloadState::new())
+        .setup(|app| {
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                println!("[stream_proxy] Starting proxy server...");
+                match stream_server::start_server().await {
+                    Ok(port) => {
+                        println!("[stream_proxy] Server started on port {}", port);
+                        let state: tauri::State<ProxyState> = app_handle.state();
+                        *state.port.lock().unwrap() = Some(port);
+                    }
+                    Err(e) => {
+                        eprintln!("[stream_proxy] Failed to start server: {}", e);
+                    }
+                }
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
+            get_stream_proxy_port,
             download_manager::start_download,
             download_manager::pause_download,
             download_manager::cancel_download,

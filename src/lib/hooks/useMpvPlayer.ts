@@ -313,13 +313,35 @@ export const useMpvPlayer = (opts?: UseMpvPlayerOptions) => {
         await setProperty('http-header-fields', '').catch(() => {});
       }
 
+      let finalUrl = url;
+      if (url.startsWith('http')) {
+        try {
+          const { invoke } = await import('@tauri-apps/api/core');
+          const port = await invoke<number | null>('get_stream_proxy_port');
+          console.log('[MPV proxy] port:', port);
+          if (port) {
+            let proxyUrl = `http://127.0.0.1:${port}/proxy?url=${encodeURIComponent(url)}`;
+            if (referer) {
+              proxyUrl += `&referer=${encodeURIComponent(referer)}`;
+            }
+            if (ua) {
+              proxyUrl += `&ua=${encodeURIComponent(ua)}`;
+            }
+            finalUrl = proxyUrl;
+          }
+        } catch (e) {
+          console.error('Failed to get proxy port:', e);
+        }
+      }
+
       await setProperty('user-agent', ua || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36').catch(console.error);
       if (referer) {
         await setProperty('referrer', referer).catch(console.error);
       } else {
         await setProperty('referrer', '').catch(console.error);
       }
-      await command('loadfile', [url]);
+      console.log('[MPV loadFile] finalUrl:', finalUrl);
+      await command('loadfile', [finalUrl]);
     } catch (err: any) {
       if (String(err).includes('instance not found')) return;
       console.error('Failed to load file:', err);
