@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   LuSearch as Search,
   LuX as X,
-  LuDownload as Download,
+  LuPlus as Plus,
   LuLoaderCircle as Loader2,
 } from "react-icons/lu";
 import { CustomSelect } from "./CustomSelect";
@@ -186,38 +186,44 @@ export const SearchSubtitlesModal: React.FC<SearchSubtitlesModalProps> = ({
           )}
 
           <div className="results-list">
-            {results.map((res: any) => (
-              <div key={res.IDSubtitleFile} className="result-item">
-                <div className="result-info">
-                  <div className="result-title-row">
-                    <span className="lang-badge">{res.SubLanguageID}</span>
-                    <span className="movie-name">{res.MovieName?.trim()}</span>
-                    {Number(res.SeriesSeason) > 0 && (
-                      <span className="season-ep">S{res.SeriesSeason}</span>
-                    )}
-                    {Number(res.SeriesEpisode) > 0 && (
-                      <span className="season-ep">E{res.SeriesEpisode}</span>
-                    )}
-                  </div>
-                  <div className="result-meta">
-                    {res.InfoReleaseGroup} {res.UserNickName}
-                  </div>
-                </div>
+            {results.map((res: any) => {
+              const dlUrl = res.SubDownloadLink?.replace(".gz", "");
+              const title =
+                `${res.InfoReleaseGroup || ""} ${res.UserNickName || ""}`.trim() ||
+                "Online Sub";
+
+              return (
                 <button
-                  className="download-btn"
+                  key={res.IDSubtitleFile}
+                  type="button"
+                  className="result-item"
                   onClick={() => {
-                    const dlUrl = res.SubDownloadLink?.replace(".gz", "");
-                    const title =
-                      `${res.InfoReleaseGroup || ""} ${res.UserNickName || ""}`.trim() ||
-                      "Online Sub";
                     onSelectSubtitle(dlUrl, title);
                     onClose();
                   }}
+                  title={`Apply ${res.MovieName || "subtitle"}`}
                 >
-                  <Download size={18} />
+                  <div className="result-info">
+                    <div className="result-title-row">
+                      <span className="lang-badge">{res.SubLanguageID}</span>
+                      <span className="movie-name">{res.MovieName?.trim()}</span>
+                      {Number(res.SeriesSeason) > 0 && (
+                        <span className="season-ep">S{res.SeriesSeason}</span>
+                      )}
+                      {Number(res.SeriesEpisode) > 0 && (
+                        <span className="season-ep">E{res.SeriesEpisode}</span>
+                      )}
+                    </div>
+                    <div className="result-meta">
+                      {res.InfoReleaseGroup} {res.UserNickName}
+                    </div>
+                  </div>
+                  <div className="apply-sub-btn" aria-hidden="true">
+                    <Plus size={18} />
+                  </div>
                 </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
