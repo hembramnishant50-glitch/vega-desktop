@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useId } from "react";
+import React, { useState, useRef, useEffect, useId, useCallback } from "react";
 import {
   LuCheck as Check,
   LuChevronDown as ChevronDown,
@@ -33,9 +33,23 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const instanceId = useId().replace(/:/g, "");
 
   const selectedOption = options.find((opt) => opt.value === value);
+
+  useEffect(() => {
+    if (isOpen && listRef.current) {
+      const selectedEl = listRef.current.querySelector<HTMLElement>(
+        ".custom-select-option.selected",
+      );
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ block: "nearest" });
+      } else {
+        listRef.current.scrollTop = 0;
+      }
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -71,6 +85,18 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
     preferredChildFocusKey: optionFocusKey(selectedIndex),
   });
 
+  const setListRef = useCallback(
+    (node: HTMLUListElement | null) => {
+      (listRef as any).current = node;
+      if (typeof focusRef === "function") {
+        (focusRef as any)(node);
+      } else if (focusRef) {
+        (focusRef as any).current = node;
+      }
+    },
+    [focusRef],
+  );
+
   useEffect(() => {
     if (!isOpen || !tvMode) return;
     const timer = window.setTimeout(() => focusSelf(), 0);
@@ -99,7 +125,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           <ul
             className="custom-select-list"
             role="listbox"
-            ref={focusRef as any}
+            ref={setListRef}
           >
             {options.map((option, index) => (
               <SelectOptionItem
