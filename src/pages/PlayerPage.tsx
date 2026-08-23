@@ -1367,7 +1367,8 @@ const DesktopPlayer: React.FC<any> = ({
         target?.isContentEditable ||
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
-        target?.tagName === "SELECT"
+        target?.tagName === "SELECT" ||
+        target?.closest("input, textarea, select, [contenteditable='true']")
       ) {
         return;
       }
@@ -1464,14 +1465,31 @@ const DesktopPlayer: React.FC<any> = ({
         }
         case "s": {
           e.preventDefault();
-          const nextChapter = mpv.chapters.find(
-            (chapter) => chapter.time > mpv.currentTime + 1,
-          );
-          if (nextChapter) {
-            mpv.seek(nextChapter.time);
-            toast(`Chapter: ${nextChapter.title}`);
+          if (e.ctrlKey || e.metaKey) {
+            const nextChapter = mpv.chapters.find(
+              (chapter) => chapter.time > mpv.currentTime + 1,
+            );
+            if (nextChapter) {
+              mpv.seek(nextChapter.time);
+              toast(`Chapter: ${nextChapter.title || "Next"}`);
+            } else {
+              toast("No next chapter");
+            }
           } else {
-            toast("No next chapter");
+            const activeSkip = combinedSkips.find(
+              (skip) => mpv.currentTime >= skip.from && mpv.currentTime < skip.to,
+            );
+            if (activeSkip) {
+              mpv.seek(activeSkip.to);
+              const title = activeSkip.title
+                ? activeSkip.title.toLowerCase().startsWith("skip")
+                  ? activeSkip.title
+                  : `Skip ${activeSkip.title}`
+                : "Intro";
+              toast(`Skipped ${title}`);
+            } else {
+              toast("No intro to skip");
+            }
           }
           break;
         }
@@ -1519,6 +1537,7 @@ const DesktopPlayer: React.FC<any> = ({
     handleZoomIn,
     handleZoomOut,
     handleResetZoom,
+    combinedSkips,
   ]);
 
   const toggleFullscreen = async () => {
