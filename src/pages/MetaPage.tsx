@@ -620,12 +620,18 @@ export const MetaPage: React.FC = () => {
                         (item.infoUrl === link && item.sourceLink === episode.link)),
                   );
                   const storedDownloadId = storedDownload?.id || id;
-                  const displayTitle = !activeSeason?.episodesLink && rows.length === 1 ? "Play" : episode.title;
+                  const displayTitle =
+                    episode.title?.trim() ||
+                    (rows.length === 1
+                      ? activeSeason?.title && activeSeason.title.toLowerCase() !== "default"
+                        ? activeSeason.title
+                        : "Play"
+                      : `${activeSeason?.title || "Episode"} ${sourceIndex + 1}`);
                   return (
                     <EpisodeRow
                       key={`${episode.link}-${index}`}
                       index={index}
-                      title={displayTitle || `${activeSeason?.title || "Episode"} ${sourceIndex + 1}`}
+                      title={displayTitle}
                       description={episode.description}
                       image={episode.image}
                       progressPercent={progressPercent}
