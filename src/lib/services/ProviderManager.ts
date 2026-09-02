@@ -314,11 +314,14 @@ export class ProviderManager {
       return [];
     }
     try {
-      const moduleExports = await this.executeModule<{ catalog?: Catalog[] }>(
-        catalogModule,
-        providerValue,
-      );
-      return moduleExports.catalog || [];
+      const moduleExports = await this.executeModule<{
+        catalog?: Catalog[] | (() => Promise<Catalog[]> | Catalog[]);
+      }>(catalogModule, providerValue);
+      let catalog = moduleExports.catalog;
+      if (typeof catalog === "function") {
+        catalog = await (catalog as any)();
+      }
+      return Array.isArray(catalog) ? catalog : [];
     } catch (error) {
       console.error("Error loading catalog:", error);
       console.error("Module content:", catalogModule);
@@ -342,11 +345,14 @@ export class ProviderManager {
       return [];
     }
     try {
-      const moduleExports = await this.executeModule<{ genres?: Catalog[] }>(
-        catalogModule,
-        providerValue,
-      );
-      return moduleExports.genres || [];
+      const moduleExports = await this.executeModule<{
+        genres?: Catalog[] | (() => Promise<Catalog[]> | Catalog[]);
+      }>(catalogModule, providerValue);
+      let genres = moduleExports.genres;
+      if (typeof genres === "function") {
+        genres = await (genres as any)();
+      }
+      return Array.isArray(genres) ? genres : [];
     } catch (error) {
       console.error("Error loading genres:", error);
       console.error("Module content:", catalogModule);

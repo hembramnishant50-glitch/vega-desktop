@@ -677,6 +677,27 @@ const TvPlayer: React.FC<any> = ({
                         {stream.quality}
                       </span>
                     )}
+                    {(() => {
+                      const rawTags: string[] = Array.isArray(stream.tags)
+                        ? stream.tags
+                        : typeof stream.tag === "string"
+                        ? [stream.tag]
+                        : [];
+                      const tags = rawTags
+                        .map((t) => (typeof t === "string" ? t.trim() : ""))
+                        .filter(
+                          (t) =>
+                            Boolean(t) &&
+                            t.toLowerCase() !==
+                              stream.quality?.toString().trim().toLowerCase(),
+                        );
+
+                      return tags.map((t, tIdx) => (
+                        <span key={tIdx} className="tv-server-quality">
+                          {t.toUpperCase()}
+                        </span>
+                      ));
+                    })()}
                     <ExternalLink className="tv-server-open-icon" size={19} />
                   </FocusableButton>
                 ))}
