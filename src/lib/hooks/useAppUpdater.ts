@@ -3,7 +3,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { ask, message } from '@tauri-apps/plugin-dialog';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { settingsStorage } from '../storage';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 // Helper to compare semver versions simply for Android
 const isNewer = (latest: string, current: string) => {
@@ -105,7 +105,14 @@ export const checkAppUpdates = async (manual = false) => {
   } catch (err: any) {
     console.error('Failed to check for app updates:', err);
     if (manual) {
-      message('Failed to check for updates. Please check your internet connection.', { title: 'Error', kind: 'error' });
+      const isRateLimit =
+        err instanceof AxiosError &&
+        err.response &&
+        (err.response.status === 403 || err.response.status === 429);
+      const errorMsg = isRateLimit
+        ? 'GitHub API rate limit exceeded. Please wait a few minutes before trying again.'
+        : 'Failed to check for updates. Please check your internet connection.';
+      message(errorMsg, { title: isRateLimit ? 'Rate Limited' : 'Error', kind: 'error' });
     }
   }
 };

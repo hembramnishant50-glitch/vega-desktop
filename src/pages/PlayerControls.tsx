@@ -887,26 +887,60 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                       No alternative servers
                     </div>
                   )}
-                  {streamData?.map((s: any, idx: number) => (
-                    <button
-                      key={idx}
-                      className={`inline-menu-item ${selectedStream?.link === s.link ? "selected" : ""}`}
-                      onClick={() => {
-                        onSelectStream && onSelectStream(s);
-                        setOpenMenu(null);
-                      }}
-                    >
-                      <div className="track-details">
-                        <span className="track-name">
-                          {s.server || `Server ${idx + 1}`}
-                        </span>
-                        {s.quality && (
-                          <span className="track-lang">{s.quality}</span>
-                        )}
-                      </div>
-                      {selectedStream?.link === s.link && <Check size={14} />}
-                    </button>
-                  ))}
+                  {streamData?.map((s: any, idx: number) => {
+                    const rawTags: string[] = Array.isArray(s.tags)
+                      ? s.tags
+                      : typeof s.tag === "string"
+                      ? [s.tag]
+                      : [];
+                    const tags = rawTags
+                      .map((t) => (typeof t === "string" ? t.trim() : ""))
+                      .filter(
+                        (t) =>
+                          Boolean(t) &&
+                          t.toLowerCase() !==
+                            s.quality?.toString().trim().toLowerCase(),
+                      );
+
+                    return (
+                      <button
+                        key={idx}
+                        className={`inline-menu-item ${selectedStream?.link === s.link ? "selected" : ""}`}
+                        onClick={() => {
+                          onSelectStream && onSelectStream(s);
+                          setOpenMenu(null);
+                        }}
+                      >
+                        <div className="track-details">
+                          <span className="track-name">
+                            {s.server || `Server ${idx + 1}`}
+                          </span>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "4px",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {s.quality && (
+                              <span className="track-lang">{s.quality}</span>
+                            )}
+                            {tags.map((t, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="track-lang"
+                                style={{ opacity: 0.85 }}
+                              >
+                                {t.toUpperCase()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        {selectedStream?.link === s.link && <Check size={14} />}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

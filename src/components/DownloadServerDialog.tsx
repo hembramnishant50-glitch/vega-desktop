@@ -244,11 +244,34 @@ export const DownloadServerDialog: React.FC<DownloadServerDialogProps> = ({
                           <h4 className="label-lg">
                             {stream.server || "Unknown Server"}
                           </h4>
-                          <span className="quality-badge">
-                            {stream.quality
-                              ? `${stream.quality}`
-                              : stream.type.toUpperCase()}
-                          </span>
+                          <div className="stream-badges">
+                            <span className="quality-badge">
+                              {stream.quality
+                                ? `${stream.quality}`
+                                : stream.type.toUpperCase()}
+                            </span>
+                            {(() => {
+                              const rawTags: string[] = Array.isArray(stream.tags)
+                                ? stream.tags
+                                : typeof stream.tag === "string"
+                                ? [stream.tag]
+                                : [];
+                              const tags = rawTags
+                                .map((t) => (typeof t === "string" ? t.trim() : ""))
+                                .filter(
+                                  (t) =>
+                                    Boolean(t) &&
+                                    t.toLowerCase() !==
+                                      stream.quality?.trim().toLowerCase(),
+                                );
+
+                              return tags.map((t, tIdx) => (
+                                <span key={tIdx} className="quality-badge tag-badge">
+                                  {t.toUpperCase()}
+                                </span>
+                              ));
+                            })()}
+                          </div>
                         </div>
                         <div
                           className="stream-action"

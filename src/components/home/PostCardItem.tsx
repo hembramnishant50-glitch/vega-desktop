@@ -16,7 +16,36 @@ export interface Post {
   providerValue?: string;
   type?: string;
   episodeTitle?: string;
+  aspectRatio?: number | string;
+  borderRadius?: number;
+  tag?: string;
+  cornerTag?: string;
 }
+
+export const parseAspectRatio = (
+  ratio?: number | string,
+  fallback: number = 2 / 3,
+): number => {
+  if (typeof ratio === "number" && Number.isFinite(ratio) && ratio > 0) {
+    return ratio;
+  }
+  if (typeof ratio === "string") {
+    const trimmed = ratio.trim();
+    if (trimmed.includes(":")) {
+      const [w, h] = trimmed.split(":").map(Number);
+      if (w > 0 && h > 0) return w / h;
+    }
+    if (trimmed.includes("/")) {
+      const [w, h] = trimmed.split("/").map(Number);
+      if (w > 0 && h > 0) return w / h;
+    }
+    const parsed = Number(trimmed);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return fallback;
+};
 
 interface PostCardItemProps {
   post: Post;
@@ -42,7 +71,7 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   const progressPalette = useArtworkPalette(
     post.progress !== undefined ? post.image : null,
   );
-  const progressColor = progressPalette["--artwork-accent"];
+  const progressColor = progressPalette?.["--artwork-accent"];
   const prepareTheme = () => {
     if (settingsStorage.isInfoPageDynamicThemeEnabled()) {
       void prefetchArtworkPalette(post.image);
@@ -109,11 +138,18 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
     },
   });
 
+  const activeAspectRatio = parseAspectRatio(post.aspectRatio, 2 / 3);
+  const isLandscape = activeAspectRatio > 1.2;
+  const isSquare = activeAspectRatio > 0.85 && activeAspectRatio <= 1.2;
+  const activeTag = post.cornerTag || post.tag;
+
   return (
     <div
       ref={cardRef as any}
       className={cn(
         "post-card",
+        isLandscape && "post-card-landscape",
+        isSquare && "post-card-square",
         cardFocused && "tv-focus",
         removeFocused && "child-focused",
       )}
@@ -140,7 +176,20 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
       aria-label={`Open ${post.title}`}
       tabIndex={tvMode ? -1 : 0}
     >
-      <div className="post-image-container">
+      <div
+        className="post-image-container"
+        style={{
+          aspectRatio: activeAspectRatio,
+          ...(typeof post.borderRadius === "number" && post.borderRadius >= 0
+            ? { borderRadius: post.borderRadius }
+            : {}),
+        }}
+      >
+        {activeTag && activeTag.trim().length > 0 && (
+          <span className="post-corner-tag">
+            {activeTag.trim().toUpperCase()}
+          </span>
+        )}
         {post.image && !imageFailed && (
           <img
             src={post.image}
