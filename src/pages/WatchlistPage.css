@@ -48,8 +48,7 @@
 
 .library-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 190px));
-  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 28px 20px;
 }
 

@@ -241,7 +241,10 @@ export const DownloadServerDialog: React.FC<DownloadServerDialogProps> = ({
                           <Server size={20} />
                         </div>
                         <div className="stream-details">
-                          <h4 className="label-lg">
+                          <h4
+                            className="label-lg"
+                            title={stream.server || "Unknown Server"}
+                          >
                             {stream.server || "Unknown Server"}
                           </h4>
                           <div className="stream-badges">
@@ -365,7 +368,10 @@ export const DownloadServerDialog: React.FC<DownloadServerDialogProps> = ({
                           <Subtitles size={20} />
                         </div>
                         <div className="stream-details">
-                          <h4 className="label-lg">
+                          <h4
+                            className="label-lg"
+                            title={`${sub.language && sub.language !== sub.title ? `${sub.language} - ` : ""}${sub.title}`}
+                          >
                             {sub.language && sub.language !== sub.title
                               ? `${sub.language} - `
                               : ""}

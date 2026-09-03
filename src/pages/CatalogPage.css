@@ -16,14 +16,22 @@
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 190px));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 28px 20px;
-  justify-content: space-between;
   padding: var(--spacing-xs) 0;
+}
+
+.catalog-grid.catalog-grid-landscape {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 32px 24px;
 }
 
 .catalog-grid .post-card {
   width: 100%;
+}
+
+.catalog-grid.catalog-grid-landscape .skeleton-card {
+  aspect-ratio: 16 / 9;
 }
 
 .catalog-virtual-grid {
@@ -61,5 +69,15 @@
   .catalog-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: var(--spacing-md);
+  }
+  .catalog-grid.catalog-grid-landscape {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-grid.catalog-grid-landscape {
+    grid-template-columns: 1fr;
   }
 }

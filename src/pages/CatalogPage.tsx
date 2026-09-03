@@ -15,10 +15,15 @@ import {
 } from "@noriginmedia/norigin-spatial-navigation-react";
 import { setFocus } from "@noriginmedia/norigin-spatial-navigation-core";
 import { providerManager } from "../lib/services/ProviderManager";
-import { PostCardItem, type Post } from "../components/home/PostCardItem";
+import {
+  PostCardItem,
+  type Post,
+  parseAspectRatio,
+} from "../components/home/PostCardItem";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Skeleton } from "../components/ui/skeleton";
 import { settingsStorage } from "../lib/storage";
+import { cn } from "../lib/utils";
 import "./CatalogPage.css";
 
 interface CatalogScrollState {
@@ -97,6 +102,12 @@ export const CatalogPage: React.FC = () => {
 
   const posts = useMemo(() => data?.pages.flat() || [], [data]);
 
+  const isLandscapeCatalog = useMemo(() => {
+    const postWithRatio = posts.find((p) => p && p.aspectRatio != null);
+    if (!postWithRatio) return false;
+    return parseAspectRatio(postWithRatio.aspectRatio, 2 / 3) > 1.2;
+  }, [posts]);
+
   useLayoutEffect(() => {
     const scroller =
       catalogGridRef.current?.closest<HTMLElement>(".layout-content") ||
@@ -108,12 +119,13 @@ export const CatalogPage: React.FC = () => {
 
   // Restore scroll position and TV remote focus when returning from a post
   useEffect(() => {
-    if (!scrollElement) return;
-
     const cached = catalogStateCache.get(catalogKey);
-    if (cached && posts.length > 0 && !restoredRef.current) {
+    if (!scrollElement || posts.length === 0) return;
+
+    if (cached && !restoredRef.current) {
       restoredRef.current = true;
-      scrollElement.scrollTop = cached.scrollTop;
+      scrollElement.scrollTo({ top: cached.scrollTop });
+
       if (tvMode && cached.focusedLink) {
         const targetKey = `CATALOG_ITEM_${encodeURIComponent(cached.focusedLink)}`;
         const timer = window.setTimeout(() => {
@@ -191,9 +203,20 @@ export const CatalogPage: React.FC = () => {
         </div>
 
         {status === "pending" ? (
-          <div className="catalog-grid">
+          <div
+            className={cn(
+              "catalog-grid",
+              isLandscapeCatalog && "catalog-grid-landscape",
+            )}
+          >
             {[...Array(20)].map((_, i) => (
-              <div key={i} className="post-card">
+              <div
+                key={i}
+                className={cn(
+                  "post-card",
+                  isLandscapeCatalog && "post-card-landscape",
+                )}
+              >
                 <Skeleton className="skeleton-card" />
                 <Skeleton className="skeleton-card-title" />
               </div>
@@ -214,7 +237,13 @@ export const CatalogPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div ref={catalogGridRef} className="catalog-grid">
+          <div
+            ref={catalogGridRef}
+            className={cn(
+              "catalog-grid",
+              isLandscapeCatalog && "catalog-grid-landscape",
+            )}
+          >
             {posts.map((post, index) => (
               <PostCardItem
                 key={`${post.link}-${index}`}
@@ -238,9 +267,20 @@ export const CatalogPage: React.FC = () => {
         <div ref={sentinelRef} className="catalog-loading-sentinel" />
 
         {isFetchingNextPage && posts.length > 0 && (
-          <div className="catalog-grid catalog-next-page-skeletons">
+          <div
+            className={cn(
+              "catalog-grid catalog-next-page-skeletons",
+              isLandscapeCatalog && "catalog-grid-landscape",
+            )}
+          >
             {[...Array(8)].map((_, index) => (
-              <div key={index} className="post-card">
+              <div
+                key={index}
+                className={cn(
+                  "post-card",
+                  isLandscapeCatalog && "post-card-landscape",
+                )}
+              >
                 <Skeleton className="skeleton-card" />
                 <Skeleton className="skeleton-card-title" />
               </div>

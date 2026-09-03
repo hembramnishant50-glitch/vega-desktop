@@ -12,10 +12,11 @@
 
 .download-dialog-content {
   display: flex;
-  width: min(520px, 100%);
+  width: min(580px, calc(100vw - 32px));
   max-height: min(760px, 86vh);
   flex-direction: column;
   overflow: hidden;
+  box-sizing: border-box;
   border: 1px solid var(--outline-variant);
   border-radius: 28px;
   color: var(--on-surface);
@@ -31,6 +32,7 @@
   gap: 18px;
   padding: 24px 24px 18px;
   border-bottom: 1px solid var(--outline-variant);
+  flex-shrink: 0;
 }
 
 .download-dialog-header h2 {
@@ -113,26 +115,37 @@
 }
 
 .download-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  padding: 14px;
+  overflow-x: hidden;
+  padding: 16px 20px 24px;
+  box-sizing: border-box;
 }
+
 .stream-list {
-  display: grid;
-  gap: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
 }
 
 .stream-item {
   display: flex;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 78px;
   align-items: center;
   gap: 14px;
-  padding: 13px;
+  padding: 14px 16px;
   border: 1px solid var(--outline-variant);
   border-radius: 20px;
   color: var(--on-surface);
   background: var(--surface-container-low);
   text-align: left;
+  overflow: hidden;
   transition:
     border-color 150ms ease,
     background-color 150ms ease,
@@ -163,8 +176,10 @@
   background: var(--primary-container);
 }
 .stream-details {
+  flex: 1 1 0;
   min-width: 0;
-  flex: 1;
+  max-width: 100%;
+  overflow: hidden;
 }
 .stream-details h4 {
   overflow: hidden;
@@ -174,6 +189,7 @@
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 }
 .stream-badges {
   display: flex;
@@ -181,6 +197,7 @@
   flex-wrap: wrap;
   align-items: center;
   margin-top: 6px;
+  max-width: 100%;
 }
 .quality-badge {
   display: inline-flex;
@@ -191,6 +208,7 @@
   font-size: 11px;
   font-weight: 720;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .quality-badge.tag-badge {
   color: var(--on-surface-variant);
@@ -199,7 +217,9 @@
 .stream-action {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
   color: var(--on-surface-variant);
 }
 .copy-btn {
