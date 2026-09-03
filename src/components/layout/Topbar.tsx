@@ -182,13 +182,16 @@ export const Topbar: React.FC = () => {
   const handleSelectSuggestion = (title: string) => {
     suppressSuggestionsRef.current = true;
     setQuery(title);
+    if (nativeInputRef.current) {
+      nativeInputRef.current.value = title;
+    }
     setSuggestions([]);
-    setIsInputFocused(false);
     setIsSuggestionsFocused(false);
-    navigate(`/?q=${encodeURIComponent(title.trim())}`);
     if (tvMode) {
       resume();
       focusSelf();
+    } else {
+      nativeInputRef.current?.focus();
     }
   };
 
