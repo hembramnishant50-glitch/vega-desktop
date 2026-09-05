@@ -1,7 +1,27 @@
 {
   "bundle": {
-    "resources": [
-      "lib/*.so"
+    "resources": ["lib/*.so"],
+    "linux": {
+      "deb": {
+        "depends": ["libmpv2", "mpv", "webkit2gtk-4.1"]
+      },
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    }
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Vega",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600,
+        "transparent": true,
+        "decorations": false,
+        "resizable": true
+      }
     ]
   }
 }

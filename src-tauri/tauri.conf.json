@@ -33,6 +33,9 @@
     "linux": {
       "deb": {
         "depends": ["libmpv2", "mpv"]
+      },
+      "appimage": {
+        "bundleMediaFramework": true
       }
     },
     "android": {
