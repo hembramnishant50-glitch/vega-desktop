@@ -63,9 +63,14 @@ Bring your own sources · Stream & download · Sync with mobile
 Optimized for **Omarchy 4+ · Hyprland 0.56 · Arch**.
 
 ```bash
-git clone https://github.com/vega-org/vega-desktop.git
+# fresh clone
+git clone https://github.com/hembramnishant50-glitch/vega-desktop.git
 cd vega-desktop
 ./install.sh              # deps → build → ~/.local/bin + Hyprland + SUPER+V
+
+# already cloned
+cd vega-desktop
+./install.sh
 ```
 
 Launch with `SUPER+V` or:
@@ -77,7 +82,7 @@ vega-desktop
 <details>
 <summary>What it does</summary>
 
-- Installs `webkit2gtk-4.1 gtk3 mpv libmpv nodejs rust` via `pacman` (if missing)
+- Installs `webkit2gtk-4.1 gtk3 mpv libmpv nodejs rust cmake clang pkgconf` via `pacman` (if missing) — `cmake` is required for `boring-sys`/`aws-lc-sys` (Rust TLS)
 - `npm ci` + `vite build` + `tauri build` (AppImage + deb)
 - Installs to `~/.local/bin/vega-desktop` + `~/.local/share/applications/vega-desktop.desktop`
 - Adds Hyprland rules (`~/.config/hypr/vega.lua`) — opaque window, fullscreen player, floating dialogs
@@ -157,7 +162,7 @@ Prerequisites: [Tauri Setup](https://tauri.app/start/prerequisites/)
 ### Development
 
 ```bash
-git clone https://github.com/vega-org/vega-desktop.git
+git clone https://github.com/hembramnishant50-glitch/vega-desktop.git
 cd vega-desktop
 npm install
 ./scripts/dev.sh          # or: npm run tauri dev
@@ -185,9 +190,13 @@ scripts/      → install / build / dev helpers
 
 **Blank window on Hyprland** → `WEBKIT_DISABLE_DMABUF_RENDERER=1 vega-desktop` or use `omarchy/desktop/vega-wayland.sh`
 
+**`cmake` not found / `boring-sys` build failed** → `sudo pacman -S cmake clang pkgconf` then rebuild — required for Rust TLS (`boring-sys`/`aws-lc-sys`)
+
 **Missing libmpv** → `sudo pacman -S mpv libmpv` and rebuild. Check `src-tauri/lib/` has `libmpv.so`
 
 **No decorations** → intentional (`transparent: true`, `decorations: false`); borders drawn by Hyprland via `vega.lua`
+
+**`destination path already exists`** → you already cloned: just `cd vega-desktop && ./install.sh` instead of `git clone` again
 
 **SUPER+V not working** → `hyprctl reload` and `omarchy menu keybindings --print`
 
