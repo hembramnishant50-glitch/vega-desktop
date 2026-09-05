@@ -44,5 +44,6 @@ dist-ssr
 vega.key
 vega.key.pub  
 src-tauri/resources/windows/vc_redist.x64.exe
- src-tauri/lib/*.so
+src-tauri/lib/*.so
 src-tauri/lib/*.dll
+src-tauri/lib/*.so.*
