@@ -1,0 +1,19 @@
+[Desktop Entry]
+Categories=AudioVideo;Player;Video;
+Comment=Native desktop app for streaming media - MPV powered, ad-free
+Exec=vega-desktop %U
+GenericName=Media Center
+Icon=vega-desktop
+Keywords=streaming;media;mpv;video;watchlist;torrent;
+MimeType=x-scheme-handler/vega;
+Name=Vega
+StartupNotify=true
+StartupWMClass=Vega
+Terminal=false
+Type=Application
+Version=1.5
+Actions=DevTools;
+
+[Desktop Action DevTools]
+Name=Open with DevTools
+Exec=vega-desktop --devtools
