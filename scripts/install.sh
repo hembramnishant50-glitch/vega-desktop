@@ -73,6 +73,9 @@ if [[ "$INSTALL_DEPS" == true ]]; then
     nodejs
     npm
     rust
+    cmake
+    clang
+    pkgconf
   )
   # rust is provided by `rust` or `rustup`; check
   MISSING=()

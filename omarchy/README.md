@@ -39,9 +39,9 @@ hyprctl clients | grep -A5 Vega
 ## What the Installer Does on Omarchy
 
 1. **Dependencies** (`pacman -S` if missing):
-   `webkit2gtk-4.1 gtk3 base-devel curl wget file openssl appmenu-gtk-module libappindicator-gtk3 librsvg mpv mpv-mpris nodejs npm rust`
+   `webkit2gtk-4.1 gtk3 base-devel curl wget file openssl appmenu-gtk-module libappindicator-gtk3 librsvg mpv mpv-mpris nodejs npm rust cmake clang pkgconf`
 
-   All are available in Arch repos. `webkit2gtk-4.1` is the WebKitGTK engine Tauri needs; `mpv` + `libmpv` are for the hardware-accelerated player.
+   All are available in Arch repos. `webkit2gtk-4.1` is the WebKitGTK engine Tauri needs; `mpv` + `libmpv` are for the hardware-accelerated player. `cmake`+`clang`+`pkgconf` are required for `boring-sys`/`aws-lc-sys` (Rust TLS) — without `cmake` the build fails with `failed to execute command: No such file or directory (os error 2)`.
 
 2. **Build**:
    - `npm ci` → `npm run build` (Vite + Tailwind)
@@ -136,9 +136,11 @@ See `PKGBUILD:1`.
 
 ## Troubleshooting
 
+- **`cmake` not found / `boring-sys` build failed**: `sudo pacman -S cmake clang pkgconf` then rebuild — Rust TLS crates (`boring-sys`/`aws-lc-sys`) need `cmake`.
 - **Missing libmpv**: `sudo pacman -S mpv libmpv` and rebuild; check `src-tauri/lib/` contains `libmpv.so`
 - **Blank WebView**: `WEBKIT_DISABLE_DMABUF_RENDERER=1 vega-desktop`
 - **No window decorations**: intentional (`decorations: false` + `transparent: true`); Hyprland draws borders via `vega.lua`
+- **`destination path 'vega-desktop' already exists`**: you already cloned — just `cd vega-desktop && ./install.sh` instead of `git clone` again
 - **SUPER+V not working**: `hyprctl reload` or check `~/.config/hypr/bindings.lua` for conflicts, then `omarchy menu keybindings --print`
 
 ## Upstream Docs

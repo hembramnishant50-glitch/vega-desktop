@@ -25,6 +25,9 @@ makedepends=(
   'rust'
   'cargo'
   'base-devel'
+  'cmake'
+  'clang'
+  'pkgconf'
 )
 optdepends=(
   'vlc: external player support'
