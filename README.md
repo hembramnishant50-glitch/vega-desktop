@@ -24,10 +24,11 @@ Bring your own sources · Stream & download · Sync with mobile
 ### Features
 
 - **BYOS** — bring your own extensions
-- **MPV** — hardware-accelerated, desktop-native player
+- **MPV** — hardware-accelerated, desktop-native player (uses system mpv)
 - **Ad-free** — stream & download, multi-audio, external subs
 - **Watchlist & history** — sync with Vega mobile
 - **Torrents, DoH, local proxy** — built-in
+- **Omarchy Settings** — in-app settings for Hyprland window rules, theme sync, keybindings
 
 > Vega does not host or provide any media. All content is sourced by the user via providers/extensions.
 
@@ -53,77 +54,66 @@ Bring your own sources · Stream & download · Sync with mobile
 | Platform | Artifact |
 |----------|----------|
 | Linux (Omarchy/Arch) | `AppImage` · `.deb` · `PKGBUILD` — see below |
-| Windows | `.msi` / `.exe` — [Releases](https://github.com/vega-org/vega-desktop/releases/latest) · [Microsoft Store](https://apps.microsoft.com/detail/9n3fdt30wdlb?referrer=appbadge&mode=full) |
+| Windows | `.msi` / `.exe` — [Releases](https://github.com/vega-org/vega-desktop/releases/latest) |
 | macOS | `.dmg` — [Releases](https://github.com/vega-org/vega-desktop/releases/latest) |
 
 ---
 
-### Omarchy / Arch — one command
+### Omarchy / Arch — install
 
 Optimized for **Omarchy 4+ · Hyprland 0.56 · Arch**.
 
 ```bash
-# fresh clone
+# clone the repo
 git clone https://github.com/hembramnishant50-glitch/vega-desktop.git
 cd vega-desktop
-./install.sh              # deps → build → ~/.local/bin + Hyprland + SUPER+V
 
-# already cloned
-cd vega-desktop
-./install.sh
+# install (builds + sets up desktop entry + Hyprland rules)
+bash scripts/omarchy/install.sh
 ```
 
-Launch with `SUPER+V` or:
+Launch from app launcher as **Vega**, or:
 
 ```bash
-vega-desktop
+vega
 ```
 
 <details>
-<summary>What it does</summary>
+<summary>What install.sh does</summary>
 
-- Installs `webkit2gtk-4.1 gtk3 mpv libmpv nodejs rust cmake clang pkgconf` via `pacman` (if missing) — `cmake` is required for `boring-sys`/`aws-lc-sys` (Rust TLS)
-- `npm ci` + `vite build` + `tauri build` (AppImage + deb)
-- Installs to `~/.local/bin/vega-desktop` + `~/.local/share/applications/vega-desktop.desktop`
-- Adds Hyprland rules (`~/.config/hypr/vega.lua`) — opaque window, fullscreen player, floating dialogs
-- Binds `SUPER+V`
-
-See [`omarchy/README.md`](omarchy/README.md) for full details.
+- Checks/installs system packages (`webkit2gtk-4.1 gtk3 librsvg pkgconf base-devel ffmpeg mpv`) via `pacman`
+- Installs Rust toolchain via `rustup` if missing
+- Runs `npm ci` + `vite build` + `tauri build` (release binary)
+- Installs binary to `~/.local/share/vega/bin/Vega`
+- Creates wrapper at `~/.local/bin/vega`
+- Adds `.desktop` entry at `~/.local/share/applications/vega.desktop`
+- Installs icons to `~/.local/share/icons/`
+- Adds Hyprland window rules via `~/.config/hypr/vega.lua` (auto-wired into `hyprland.lua`)
 
 </details>
 
-**Options**
+**Uninstall**
 
 ```bash
-./install.sh --system      # → /opt/vega-desktop + /usr/share/applications (sudo)
-./install.sh --no-deps     # skip pacman
-./install.sh --no-build    # only desktop + Hyprland (use prebuilt binary)
-./uninstall.sh             # remove
-./uninstall.sh --purge     # + wipe data
+bash scripts/omarchy/uninstall.sh
 ```
 
-**Other helpers**
+**Direct run (no install)**
 
 ```bash
-./scripts/dev.sh           # tauri dev with Wayland envs
-./scripts/build.sh         # production bundles
-./scripts/build.sh debug   # fast debug bundle
-./scripts/clean.sh         # wipe dist + target
-bash omarchy/theme/sync-theme.sh  # sync Omarchy accent → Vega
+bash scripts/omarchy/run.sh
 ```
 
-**Hyprland**
+---
 
-- Rule: `omarchy/hypr/vega.lua` → `~/.config/hypr/vega.lua`
-- Auto-wired: `pcall(require, "hypr.vega")` in `hyprland.lua`
-- Wayland: `GDK_BACKEND=wayland,x11` — if blank window, try `WEBKIT_DISABLE_DMABUF_RENDERER=1 vega-desktop`
-- Manual reload: `hyprctl reload`
+### In-app Omarchy Settings
 
-**PKGBUILD**
+Open **Settings → Omarchy** in the app to configure:
 
-```bash
-makepkg -si
-```
+- **Theme Sync** — match Hyprland accent color
+- **Wayland** — toggle Wayland/X11 backend
+- **Hyprland Status** — shows window rule status
+- **Keybindings** — view/configure keyboard shortcuts
 
 ---
 
@@ -136,7 +126,7 @@ npm run tauri dev        # dev
 npm run tauri build      # → src-tauri/target/release/bundle/
 ```
 
-Deb depends: `libmpv2, mpv` (Debian) · Arch: `mpv libmpv webkit2gtk-4.1`
+Requires: `mpv`, `libmpv`, `webkit2gtk-4.1`, `gtk3`
 
 ---
 
@@ -165,40 +155,38 @@ Prerequisites: [Tauri Setup](https://tauri.app/start/prerequisites/)
 git clone https://github.com/hembramnishant50-glitch/vega-desktop.git
 cd vega-desktop
 npm install
-./scripts/dev.sh          # or: npm run tauri dev
+npm run tauri dev
 ```
 
 | Script | Description |
 |--------|-------------|
-| `dev` | Vite dev server |
-| `build` | Typecheck + Vite build |
-| `tauri dev` | App + HMR (port 1420) |
-| `tauri build` | Production bundles |
+| `npm run dev` | Vite dev server |
+| `npm run build` | Typecheck + Vite build |
+| `npm run tauri dev` | App + HMR (port 1420) |
+| `npm run tauri build` | Production bundles |
 
 **Stack** — Tauri 2 · React 19 · TypeScript · Vite · Zustand · Tailwind 4 · MPV
 
 ```
 src/          → React app (pages, components, lib)
 src-tauri/    → Rust backend (MPV, torrent, DoH, store)
-omarchy/      → Hyprland + desktop + theme (Arch)
-scripts/      → install / build / dev helpers
+scripts/omarchy/  → Omarchy install/uninstall/run
+scripts/      → build helpers
 ```
 
 ---
 
 ### Troubleshooting
 
-**Blank window on Hyprland** → `WEBKIT_DISABLE_DMABUF_RENDERER=1 vega-desktop` or use `omarchy/desktop/vega-wayland.sh`
+**Blank window on Hyprland** → `WEBKIT_DISABLE_DMABUF_RENDERER=1 vega`
 
-**`cmake` not found / `boring-sys` build failed** → `sudo pacman -S cmake clang pkgconf` then rebuild — required for Rust TLS (`boring-sys`/`aws-lc-sys`)
+**`cmake` not found / build failed** → `sudo pacman -S cmake clang pkgconf` then rebuild
 
-**Missing libmpv** → `sudo pacman -S mpv libmpv` and rebuild. Check `src-tauri/lib/` has `libmpv.so`
+**Missing mpv** → `sudo pacman -S mpv libmpv`
 
-**No decorations** → intentional (`transparent: true`, `decorations: false`); borders drawn by Hyprland via `vega.lua`
+**No decorations** → intentional (`decorations: false`); borders drawn by Hyprland via `vega.lua`
 
-**`destination path already exists`** → you already cloned: just `cd vega-desktop && ./install.sh` instead of `git clone` again
-
-**SUPER+V not working** → `hyprctl reload` and `omarchy menu keybindings --print`
+**SUPER+V not working** → `hyprctl reload` and check keybindings in Settings → Omarchy
 
 ---
 
