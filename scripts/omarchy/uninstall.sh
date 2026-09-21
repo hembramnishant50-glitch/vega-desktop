@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+INSTALL_PREFIX="${HOME}/.local/share/vega"
+WRAPPER="${HOME}/.local/bin/vega"
+DESKTOP_FILE="${HOME}/.local/share/applications/vega.desktop"
+ICON_DIR="${HOME}/.local/share/icons"
+RULES_FILE="${HOME}/.config/hypr/vega.lua"
+HYPR_CONFIG="${HOME}/.config/hypr/hyprland.lua"
+MARKER_BEGIN="# >>> vega-desktop begin"
+MARKER_END="# <<< vega-desktop end"
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+info()  { echo -e "${GREEN}[vega]${NC} $*"; }
+warn()  { echo -e "${YELLOW}[vega]${NC} $*"; }
+
+echo "This will remove Vega from your system."
+read -p "Continue? [y/N] " -r
+[[ $REPLY =~ ^[Yy]$ ]] || exit 0
+
+# ── 1. Remove install directory ──────────────────────────────────────
+if [ -d "$INSTALL_PREFIX" ]; then
+  rm -rf "$INSTALL_PREFIX"
+  info "Removed ${INSTALL_PREFIX}"
+fi
+
+# ── 2. Remove wrapper ────────────────────────────────────────────────
+if [ -f "$WRAPPER" ]; then
+  rm -f "$WRAPPER"
+  info "Removed ${WRAPPER}"
+fi
+
+# ── 3. Remove desktop entry ──────────────────────────────────────────
+if [ -f "$DESKTOP_FILE" ]; then
+  rm -f "$DESKTOP_FILE"
+  info "Removed ${DESKTOP_FILE}"
+fi
+
+# ── 4. Remove icons ──────────────────────────────────────────────────
+for f in "${ICON_DIR}"/vega-*.png; do
+  [ -f "$f" ] && rm -f "$f" && info "Removed $(basename "$f")"
+done
+gtk-update-icon-cache -f -t "${ICON_DIR}" 2>/dev/null || true
+
+# ── 5. Remove Hyprland rules ─────────────────────────────────────────
+if [ -f "$RULES_FILE" ]; then
+  rm -f "$RULES_FILE"
+  info "Removed ${RULES_FILE}"
+fi
+
+if [ -f "$HYPR_CONFIG" ] && grep -q "$MARKER_BEGIN" "$HYPR_CONFIG" 2>/dev/null; then
+  awk -v b="$MARKER_BEGIN" -v e="$MARKER_END" '
+    $0 ~ b { skip=1; next }
+    $0 ~ e { skip=0; next }
+    !skip { print }
+  ' "$HYPR_CONFIG" > "${HYPR_CONFIG}.tmp" && mv "${HYPR_CONFIG}.tmp" "$HYPR_CONFIG"
+  info "Removed marker block from hyprland.lua"
+fi
+
+echo ""
+info "Vega has been uninstalled."

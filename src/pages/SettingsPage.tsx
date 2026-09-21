@@ -8,11 +8,14 @@ import {
   LuCaptions as Captions,
   LuSlidersHorizontal as Sliders,
   LuInfo as Info,
+  LuBox as Box,
 } from "react-icons/lu";
 import { PlayerSettings } from "../components/settings/PlayerSettings";
 import { SubtitleSettings } from "../components/settings/SubtitleSettings";
 import { PreferencesSettings } from "../components/settings/PreferencesSettings";
+import { OmarchySettings } from "../components/settings/OmarchySettings";
 import { GitHubStarButton } from "../components/settings/GitHubStarButton";
+import "../components/settings/OmarchySettings.css";
 import { checkAppUpdates } from "../lib/hooks/useAppUpdater";
 import { FocusableButton } from "../components/layout/FocusableButton";
 import { Switch } from "../components/ui/switch";
@@ -140,6 +143,19 @@ export const SettingsPage: React.FC = () => {
           </h2>
           <div className="settings-card">
             <PreferencesSettings />
+          </div>
+        </section>
+
+        {/* Omarchy Group */}
+        <section className="settings-group">
+          <h2
+            className="title-md flex items-center gap-2"
+            style={{ marginBottom: "8px" }}
+          >
+            <Box size={20} /> Omarchy
+          </h2>
+          <div className="settings-card">
+            <OmarchySettings />
           </div>
         </section>
 
