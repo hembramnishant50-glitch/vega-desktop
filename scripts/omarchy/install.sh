@@ -9,8 +9,8 @@ RULES_DIR="${HOME}/.config/hypr"
 RULES_FILE="${RULES_DIR}/vega.lua"
 HYPR_CONFIG="${RULES_DIR}/hyprland.lua"
 REPO_DIR="${1:-.}"
-MARKER_BEGIN="# >>> vega-desktop begin"
-MARKER_END="# <<< vega-desktop end"
+MARKER_BEGIN="-- >>> vega-desktop begin"
+MARKER_END="-- <<< vega-desktop end"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -116,38 +116,32 @@ info "Icons installed to ${ICON_DIR}"
 if [ -f "$HYPR_CONFIG" ]; then
   mkdir -p "$RULES_DIR"
 
-  # Write reversible rule module
+  # Write reversible rule module (uses Omarchy's global `o` helper)
   cat > "$RULES_FILE" <<'LUA'
 -- vega.lua — auto-generated, reversible by uninstall.sh
-local o = helpers or {}
-if not o.window then
-  o.window = function(match, rules)
-    return { rule = match, properties = rules }
-  end
-end
-return {
-  o.window({ class = "vega" }, {
-    float = true,
-    size = { 800, 600 },
-    center = true,
-    animation = "slide",
-  }),
-}
+o.window({ class = "vega" }, {
+  float = true,
+  size = { 800, 600 },
+  center = true,
+  animation = "slide",
+})
 LUA
 
-  # Remove old marker block if present, then append new one
-  if grep -q "$MARKER_BEGIN" "$HYPR_CONFIG" 2>/dev/null; then
-    awk -v b="$MARKER_BEGIN" -v e="$MARKER_END" '
-      $0 ~ b { skip=1; next }
-      $0 ~ e { skip=0; next }
-      !skip { print }
-    ' "$HYPR_CONFIG" > "${HYPR_CONFIG}.tmp" && mv "${HYPR_CONFIG}.tmp" "$HYPR_CONFIG"
-  fi
+  # Remove old marker block if present (handles both "-- >>>" and legacy "# >>>"), then append new one
+  for legacy in "$MARKER_BEGIN" "# >>> vega-desktop begin"; do
+    if grep -qF "$legacy" "$HYPR_CONFIG" 2>/dev/null; then
+      awk -v b="$legacy" -v e1="$MARKER_END" -v e2="# <<< vega-desktop end" '
+        $0 ~ b { skip=1; next }
+        $0 ~ e1 || $0 ~ e2 { skip=0; next }
+        !skip { print }
+      ' "$HYPR_CONFIG" > "${HYPR_CONFIG}.tmp" && mv "${HYPR_CONFIG}.tmp" "$HYPR_CONFIG"
+    fi
+  done
 
   cat >> "$HYPR_CONFIG" <<LUA
 
 ${MARKER_BEGIN}
-dofile "${RULES_FILE}"
+dofile("${RULES_FILE}")
 ${MARKER_END}
 LUA
 

@@ -7,8 +7,8 @@ DESKTOP_FILE="${HOME}/.local/share/applications/vega.desktop"
 ICON_DIR="${HOME}/.local/share/icons"
 RULES_FILE="${HOME}/.config/hypr/vega.lua"
 HYPR_CONFIG="${HOME}/.config/hypr/hyprland.lua"
-MARKER_BEGIN="# >>> vega-desktop begin"
-MARKER_END="# <<< vega-desktop end"
+MARKER_BEGIN="-- >>> vega-desktop begin"
+MARKER_END="-- <<< vega-desktop end"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -51,14 +51,16 @@ if [ -f "$RULES_FILE" ]; then
   info "Removed ${RULES_FILE}"
 fi
 
-if [ -f "$HYPR_CONFIG" ] && grep -q "$MARKER_BEGIN" "$HYPR_CONFIG" 2>/dev/null; then
-  awk -v b="$MARKER_BEGIN" -v e="$MARKER_END" '
-    $0 ~ b { skip=1; next }
-    $0 ~ e { skip=0; next }
-    !skip { print }
-  ' "$HYPR_CONFIG" > "${HYPR_CONFIG}.tmp" && mv "${HYPR_CONFIG}.tmp" "$HYPR_CONFIG"
-  info "Removed marker block from hyprland.lua"
-fi
+for legacy in "$MARKER_BEGIN" "# >>> vega-desktop begin"; do
+  if [ -f "$HYPR_CONFIG" ] && grep -qF "$legacy" "$HYPR_CONFIG" 2>/dev/null; then
+    awk -v b="$legacy" -v e1="$MARKER_END" -v e2="# <<< vega-desktop end" '
+      $0 ~ b { skip=1; next }
+      $0 ~ e1 || $0 ~ e2 { skip=0; next }
+      !skip { print }
+    ' "$HYPR_CONFIG" > "${HYPR_CONFIG}.tmp" && mv "${HYPR_CONFIG}.tmp" "$HYPR_CONFIG"
+    info "Removed marker block from hyprland.lua"
+  fi
+done
 
 echo ""
 info "Vega has been uninstalled."
