@@ -58,7 +58,7 @@ export const PlayerInitError: React.FC<PlayerInitErrorProps> = ({
           </p>
         )}
         <div className="player-error-actions">
-          {onOpenVlc && <button onClick={onOpenVlc}>Open in VLC</button>}
+          {onOpenVlc && <button onClick={onOpenVlc}>Open in mpv</button>}
           <button onClick={handleCopy}>
             {copied ? "Copied" : "Copy Error"}
           </button>

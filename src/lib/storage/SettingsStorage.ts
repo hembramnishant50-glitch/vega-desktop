@@ -135,12 +135,12 @@ export class SettingsStorage {
   getDefaultVlcPath(): string {
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes("windows")) {
-      return "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe";
+      return "C:\\Program Files\\mpv\\mpv.exe";
     }
     if (userAgent.includes("mac")) {
-      return "/Applications/VLC.app/Contents/MacOS/VLC";
+      return "/opt/homebrew/bin/mpv";
     }
-    return "/usr/bin/vlc";
+    return "/usr/bin/mpv";
   }
 
   getVlcPath(): string {

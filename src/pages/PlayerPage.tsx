@@ -622,7 +622,7 @@ const TvPlayer: React.FC<any> = ({
                   ? useExternalPlayer
                     ? "Open in external player"
                     : "Play in Vega"
-                  : "Open in VLC"}
+                  : "Open in mpv"}
               </span>
               <h1>{state.primaryTitle}</h1>
               {activeEpisode?.title && <p>{activeEpisode.title}</p>}
@@ -637,7 +637,7 @@ const TvPlayer: React.FC<any> = ({
                   ? "Opening app chooser…"
                   : isAndroid
                     ? "Opening Vega player…"
-                    : "Opening VLC…"}
+                    : "Opening mpv…"}
               </span>
             </div>
           ) : (
@@ -992,10 +992,10 @@ const DesktopPlayer: React.FC<any> = ({
         playerPath: settingsStorage.getVlcPath(),
         headers: selectedStream.headers || null,
       });
-      toast("Opened in VLC");
+      toast("Opened in mpv");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error("Failed to open VLC:", error);
+      console.error("Failed to open mpv:", error);
       window.alert(message);
     }
   }, [selectedStream, toast]);

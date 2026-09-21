@@ -11,8 +11,8 @@ export const PlayerSettings: React.FC = () => {
     useState<boolean>(true);
   const [hwAccelEnabled, setHwAccelEnabled] = useState<boolean>(false);
   const [externalPlayerEnabled, setExternalPlayerEnabled] = useState(false);
-  const [vlcEnabled, setVlcEnabled] = useState(false);
-  const [vlcPath, setVlcPath] = useState("");
+  const [mpvEnabled, setMpvEnabled] = useState(false);
+  const [mpvPath, setMpvPath] = useState("");
 
   const isAndroid = navigator.userAgent.toLowerCase().includes("android");
 
@@ -21,8 +21,8 @@ export const PlayerSettings: React.FC = () => {
     setShowEpisodeSidebarButton(settingsStorage.showPlayerEpisodeSidebar());
     setHwAccelEnabled(settingsStorage.isHardwareAccelerationEnabled());
     setExternalPlayerEnabled(settingsStorage.isExternalPlayerEnabled());
-    setVlcEnabled(settingsStorage.isVlcEnabled());
-    setVlcPath(settingsStorage.getVlcPath());
+    setMpvEnabled(settingsStorage.isVlcEnabled());
+    setMpvPath(settingsStorage.getVlcPath());
   }, []);
 
   const handleToggleSeekButtons = (enabled: boolean) => {
@@ -41,31 +41,31 @@ export const PlayerSettings: React.FC = () => {
     settingsStorage.setHardwareAccelerationEnabled(nextState);
   };
 
-  const handleChangeVlcPath = async () => {
+  const handleChangeMpvPath = async () => {
     try {
       const selected = await open({
         directory: false,
         multiple: false,
         filters: navigator.userAgent.toLowerCase().includes("windows")
-          ? [{ name: "VLC executable", extensions: ["exe"] }]
+          ? [{ name: "mpv executable", extensions: ["exe"] }]
           : undefined,
       });
       if (selected && typeof selected === "string") {
-        setVlcPath(selected);
+        setMpvPath(selected);
         settingsStorage.setVlcPath(selected);
       }
     } catch (err) {
-      console.error("Failed to select VLC executable:", err);
+      console.error("Failed to select mpv executable:", err);
     }
   };
 
-  const handleResetVlcPath = () => {
+  const handleResetMpvPath = () => {
     settingsStorage.resetVlcPath();
-    setVlcPath(settingsStorage.getVlcPath());
+    setMpvPath(settingsStorage.getVlcPath());
   };
 
-  const handleToggleVlc = (enabled: boolean) => {
-    setVlcEnabled(enabled);
+  const handleToggleMpv = (enabled: boolean) => {
+    setMpvEnabled(enabled);
     settingsStorage.setVlcEnabled(enabled);
   };
 
@@ -127,7 +127,7 @@ export const PlayerSettings: React.FC = () => {
 
       <div className="settings-divider" />
 
-      {/* External Player / VLC */}
+      {/* External Player / mpv */}
       {isAndroid ? (
         <div className="settings-row">
           <div className="settings-info">
@@ -147,42 +147,42 @@ export const PlayerSettings: React.FC = () => {
         <>
           <div className="settings-row">
             <div className="settings-info">
-              <h3 className="label-lg">VLC Player</h3>
+              <h3 className="label-lg">mpv Player</h3>
               <p className="body-md text-muted">
-                Open the selected server directly in VLC instead of Vega&apos;s
+                Open streams directly in mpv instead of Vega&apos;s
                 player.
               </p>
             </div>
             <Switch
-              checked={vlcEnabled}
-              onCheckedChange={handleToggleVlc}
-              aria-label="Use VLC as the external player"
+              checked={mpvEnabled}
+              onCheckedChange={handleToggleMpv}
+              aria-label="Use mpv as the external player"
             />
           </div>
-          {vlcEnabled && (
+          {mpvEnabled && (
             <>
               <div className="settings-divider" />
               <div className="settings-row">
                 <div className="settings-info">
-                  <h3 className="label-lg">VLC Path</h3>
+                  <h3 className="label-lg">mpv Path</h3>
                   <p
                     className="body-md text-muted"
                     style={{ wordBreak: "break-all" }}
                   >
-                    {vlcPath}
+                    {mpvPath}
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <FocusableButton
                     className="theme-toggle-btn active"
-                    onClick={handleChangeVlcPath}
+                    onClick={handleChangeMpvPath}
                   >
                     <FolderOpen size={16} /> Change
                   </FocusableButton>
-                  {vlcPath !== settingsStorage.getDefaultVlcPath() && (
+                  {mpvPath !== settingsStorage.getDefaultVlcPath() && (
                     <FocusableButton
                       className="theme-toggle-btn"
-                      onClick={handleResetVlcPath}
+                      onClick={handleResetMpvPath}
                     >
                       Reset
                     </FocusableButton>

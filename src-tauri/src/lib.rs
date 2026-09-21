@@ -323,24 +323,25 @@ fn open_external_player(
     headers: Option<HashMap<String, String>>,
 ) -> Result<(), String> {
     let default_path = if cfg!(target_os = "windows") {
-        r"C:\Program Files\VideoLAN\VLC\vlc.exe"
+        r"C:\Program Files\mpv\mpv.exe"
     } else if cfg!(target_os = "macos") {
-        "/Applications/VLC.app/Contents/MacOS/VLC"
+        "/opt/homebrew/bin/mpv"
     } else {
-        "/usr/bin/vlc"
+        "/usr/bin/mpv"
     };
     let path = player_path
         .filter(|value| !value.trim().is_empty())
         .unwrap_or_else(|| default_path.to_string());
     if !std::path::Path::new(&path).is_file() {
         return Err(format!(
-            "VLC was not found at '{}'. Change its path in Settings.",
+            "mpv was not found at '{}'. Install with: omarchy pkg add mpv",
             path
         ));
     }
 
     let mut command = std::process::Command::new(&path);
-    command.arg("--fullscreen");
+    command.arg("--fullscreen=yes");
+    command.arg("--keep-open=no");
     if let Some(headers) = headers {
         for (name, value) in headers {
             match name.to_ascii_lowercase().as_str() {
@@ -372,7 +373,7 @@ fn open_external_player(
     command
         .spawn()
         .map(|_| ())
-        .map_err(|error| format!("Failed to launch VLC: {error}"))
+        .map_err(|error| format!("Failed to launch mpv: {error}"))
 }
 
 #[tauri::command]

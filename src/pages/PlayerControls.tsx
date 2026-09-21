@@ -1155,7 +1155,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
                       }}
                     >
                       <ExternalLink size={18} />
-                      <span>Open in VLC</span>
+                      <span>Open in mpv</span>
                     </button>
                   )}
                   {onCopyLink && (
