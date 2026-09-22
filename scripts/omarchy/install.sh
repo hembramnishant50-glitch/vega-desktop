@@ -101,16 +101,28 @@ StartupWMClass=vega
 EOF
 info "Desktop: ${DESKTOP_FILE}"
 
-# ── 6. Icons ──────────────────────────────────────────────────────────
-mkdir -p "${ICON_DIR}"
-for size in 32 64 128 256; do
-  [ -f "src-tauri/icons/${size}x${size}.png" ] && \
-    cp "src-tauri/icons/${size}x${size}.png" "${ICON_DIR}/vega-${size}x${size}.png"
+# ── 6. Icons (freedesktop hicolor) ──────────────────────────────────
+# Install to hicolor so Icon=vega resolves in any theme
+for size in 32 64 128 256 512; do
+  src="src-tauri/icons/icon-${size}x${size}.png"
+  [ -f "$src" ] || src="src-tauri/icons/${size}x${size}.png"
+  if [ -f "$src" ]; then
+    mkdir -p "${ICON_DIR}/hicolor/${size}x${size}/apps"
+    cp -f "$src" "${ICON_DIR}/hicolor/${size}x${size}/apps/vega.png"
+  fi
 done
-[ -f "src-tauri/icons/128x128@2x.png" ] && \
-  cp "src-tauri/icons/128x128@2x.png" "${ICON_DIR}/vega-256x256.png"
-gtk-update-icon-cache -f -t "${ICON_DIR}" 2>/dev/null || true
-info "Icons installed to ${ICON_DIR}"
+# scalable + top-level fallback (some launchers check ~/.local/share/icons/vega.png)
+if [ -f "src-tauri/icons/icon-rounded.svg" ]; then
+  mkdir -p "${ICON_DIR}/hicolor/scalable/apps"
+  cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/hicolor/scalable/apps/vega.svg"
+  cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/vega.svg"
+fi
+[ -f "src-tauri/icons/icon-512x512.png" ] && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega.png"
+# cleanup legacy misnamed icons from previous installer
+rm -f "${ICON_DIR}"/vega-*.png 2>/dev/null || true
+gtk-update-icon-cache -f -t "${ICON_DIR}/hicolor" 2>/dev/null || true
+update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
+info "Icons installed to ${ICON_DIR}/hicolor"
 
 # ── 7. Hyprland window rules ──────────────────────────────────────────
 if [ -f "$HYPR_CONFIG" ]; then

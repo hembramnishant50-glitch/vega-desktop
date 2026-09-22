@@ -40,10 +40,19 @@ if [ -f "$DESKTOP_FILE" ]; then
 fi
 
 # ── 4. Remove icons ──────────────────────────────────────────────────
-for f in "${ICON_DIR}"/vega-*.png; do
+# hicolor icons + top-level fallbacks + legacy misnamed
+for f in "${ICON_DIR}"/vega.png "${ICON_DIR}"/vega.svg "${ICON_DIR}"/vega-*.png; do
   [ -f "$f" ] && rm -f "$f" && info "Removed $(basename "$f")"
 done
-gtk-update-icon-cache -f -t "${ICON_DIR}" 2>/dev/null || true
+for size in 32 64 128 256 512; do
+  f="${ICON_DIR}/hicolor/${size}x${size}/apps/vega.png"
+  [ -f "$f" ] && rm -f "$f" && info "Removed hicolor/${size}x${size}/apps/vega.png"
+done
+[ -f "${ICON_DIR}/hicolor/scalable/apps/vega.svg" ] && rm -f "${ICON_DIR}/hicolor/scalable/apps/vega.svg" && info "Removed hicolor/scalable/apps/vega.svg"
+gtk-update-icon-cache -f -t "${ICON_DIR}/hicolor" 2>/dev/null || true
+update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
+# also clean hicolor cache left behind by old installer
+rm -f "${ICON_DIR}/icon-theme.cache" 2>/dev/null || true
 
 # ── 5. Remove Hyprland rules ─────────────────────────────────────────
 if [ -f "$RULES_FILE" ]; then
