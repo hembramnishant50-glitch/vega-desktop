@@ -349,14 +349,9 @@ const PlayerInner: React.FC<PlayerInnerProps> = ({ state }) => {
     provider: state.providerValue || provider?.value || "",
   });
 
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-  const isLinux =
-    navigator.userAgent.toLowerCase().includes("linux") && !isAndroid;
-  const useExternalPlayer =
-    isAndroid && settingsStorage.isExternalPlayerEnabled();
-  const useVlc = !isAndroid && settingsStorage.isVlcEnabled();
+  const useVlc = settingsStorage.isVlcEnabled();
 
-  if (isAndroid || isLinux || useVlc) {
+  if (useVlc) {
     return (
       <TvPlayer
         state={state}
@@ -366,9 +361,6 @@ const PlayerInner: React.FC<PlayerInnerProps> = ({ state }) => {
         streamData={streamData}
         selectedStream={selectedStream}
         setSelectedStream={setSelectedStream}
-        isAndroid={isAndroid}
-        isLinux={isLinux}
-        useExternalPlayer={useExternalPlayer}
         useVlc={useVlc}
         hourglassSandColor={hourglassSandColor}
       />
@@ -400,9 +392,6 @@ const TvPlayer: React.FC<any> = ({
   streamData,
   selectedStream,
   setSelectedStream,
-  isAndroid,
-  isLinux,
-  useExternalPlayer,
   useVlc,
   hourglassSandColor,
 }) => {
@@ -497,13 +486,7 @@ const TvPlayer: React.FC<any> = ({
           }
         }
 
-        if (isAndroid) {
-          const { openUrl } = await import("@tauri-apps/plugin-opener");
-          const headers = stream.headers ? JSON.stringify(stream.headers) : "";
-          const external = useExternalPlayer ? "&external=1" : "";
-          const intentUrl = `vega://play?url=${encodeURIComponent(playUrl)}&headers=${encodeURIComponent(headers)}${external}`;
-          await openUrl(intentUrl);
-        } else if (isLinux || useVlc) {
+        if (useVlc) {
           const { invoke } = await import("@tauri-apps/api/core");
           await invoke("open_external_player", {
             url: playUrl,
@@ -518,7 +501,7 @@ const TvPlayer: React.FC<any> = ({
         setTimeout(() => setIsLaunching(false), 2000);
       }
     },
-    [isAndroid, isLinux, useExternalPlayer, useVlc],
+    [useVlc],
   );
 
   if (streamLoading) {
@@ -618,11 +601,7 @@ const TvPlayer: React.FC<any> = ({
             </FocusableButton>
             <div className="tv-server-title-copy">
               <span className="tv-server-eyebrow">
-                {isAndroid
-                  ? useExternalPlayer
-                    ? "Open in external player"
-                    : "Play in Vega"
-                  : "Open in mpv"}
+                {"Open in mpv"}
               </span>
               <h1>{state.primaryTitle}</h1>
               {activeEpisode?.title && <p>{activeEpisode.title}</p>}
@@ -633,11 +612,7 @@ const TvPlayer: React.FC<any> = ({
             <div className="tv-server-launching">
               <div className="loading-spinner" />
               <span>
-                {isAndroid && useExternalPlayer
-                  ? "Opening app chooser…"
-                  : isAndroid
-                    ? "Opening Vega player…"
-                    : "Opening mpv…"}
+                {"Opening mpv…"}
               </span>
             </div>
           ) : (
@@ -817,7 +792,6 @@ const DesktopPlayer: React.FC<any> = ({
     alwaysOnTop: boolean;
   } | null>(null);
   const manualFullscreenRef = useRef(false);
-  const isWindows = navigator.userAgent.toLowerCase().includes("windows");
 
   const downloads = useDownloadStore((state) => state.downloads);
 
@@ -1594,11 +1568,7 @@ const DesktopPlayer: React.FC<any> = ({
         alwaysOnTop: await win.isAlwaysOnTop(),
       };
 
-      if (isWindows) {
-        await invoke("set_player_fullscreen", { fullscreen: true });
-      } else {
-        await win.setFullscreen(true);
-      }
+      await win.setFullscreen(true);
 
       const monitor = await currentMonitor();
       const actualFullscreen = await win.isFullscreen();
@@ -1678,9 +1648,7 @@ const DesktopPlayer: React.FC<any> = ({
               ),
             ),
           );
-          if (isWindows) {
-            await invoke("ensure_window_in_work_area", { maximized: false });
-          }
+          // Hyprland manages window placement
         }
       } else {
         if (prePipStateRef.current) {

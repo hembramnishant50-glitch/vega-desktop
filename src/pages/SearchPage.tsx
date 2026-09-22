@@ -69,8 +69,7 @@ export const SearchPage: React.FC = () => {
   const nativeInputRef = useRef<HTMLInputElement>(null);
   const navigatingToSuggestionsRef = useRef(false);
   const suppressSuggestionsRef = useRef(true);
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const tvMode = settingsStorage.isTvModeEnabled();
   const {
     ref: searchFocusRef,
     focused: searchFocused,

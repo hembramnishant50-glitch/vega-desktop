@@ -3,19 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 // @ts-expect-error type error without @types/node package
 import process from "node:process";
-// @ts-expect-error type error without @types/node package
-import { readFileSync } from "node:fs";
 const host = process.env.TAURI_DEV_HOST;
-
-const getSharedMobileTmdbKey = () => {
-  try {
-    const contents = readFileSync(`${process.cwd()}/../vega-mobile/.env`, "utf8");
-    const match = contents.match(/^\s*TMDB_API_KEY\s*=\s*(.+?)\s*$/m);
-    return match?.[1]?.replace(/^['"]|['"]$/g, "").trim() || "";
-  } catch {
-    return "";
-  }
-};
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -23,8 +11,7 @@ export default defineConfig(({ mode }) => {
   const tmdbApiKey =
     desktopEnv.TMDB_API_KEY ||
     desktopEnv.VITE_TMDB_API_KEY ||
-    getSharedMobileTmdbKey() ||
-    "";
+"";
 
   const proxyApiUrl =
     desktopEnv.PROXY_API_URL ||

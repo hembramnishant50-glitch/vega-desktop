@@ -10,17 +10,13 @@ export const PlayerSettings: React.FC = () => {
   const [showEpisodeSidebarButton, setShowEpisodeSidebarButton] =
     useState<boolean>(true);
   const [hwAccelEnabled, setHwAccelEnabled] = useState<boolean>(false);
-  const [externalPlayerEnabled, setExternalPlayerEnabled] = useState(false);
   const [mpvEnabled, setMpvEnabled] = useState(false);
   const [mpvPath, setMpvPath] = useState("");
-
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
 
   useEffect(() => {
     setShowSeekButtons(!settingsStorage.hideSeekButtons());
     setShowEpisodeSidebarButton(settingsStorage.showPlayerEpisodeSidebar());
     setHwAccelEnabled(settingsStorage.isHardwareAccelerationEnabled());
-    setExternalPlayerEnabled(settingsStorage.isExternalPlayerEnabled());
     setMpvEnabled(settingsStorage.isVlcEnabled());
     setMpvPath(settingsStorage.getVlcPath());
   }, []);
@@ -46,9 +42,7 @@ export const PlayerSettings: React.FC = () => {
       const selected = await open({
         directory: false,
         multiple: false,
-        filters: navigator.userAgent.toLowerCase().includes("windows")
-          ? [{ name: "mpv executable", extensions: ["exe"] }]
-          : undefined,
+        filters: undefined,
       });
       if (selected && typeof selected === "string") {
         setMpvPath(selected);
@@ -67,11 +61,6 @@ export const PlayerSettings: React.FC = () => {
   const handleToggleMpv = (enabled: boolean) => {
     setMpvEnabled(enabled);
     settingsStorage.setVlcEnabled(enabled);
-  };
-
-  const handleToggleExternalPlayer = (enabled: boolean) => {
-    setExternalPlayerEnabled(enabled);
-    settingsStorage.setExternalPlayerEnabled(enabled);
   };
 
   return (
@@ -128,23 +117,8 @@ export const PlayerSettings: React.FC = () => {
       <div className="settings-divider" />
 
       {/* External Player / mpv */}
-      {isAndroid ? (
-        <div className="settings-row">
-          <div className="settings-info">
-            <h3 className="label-lg">External Player</h3>
-            <p className="body-md text-muted">
-              Show Android&apos;s app chooser for network streams instead of
-              playing them inside Vega.
-            </p>
-          </div>
-          <Switch
-            checked={externalPlayerEnabled}
-            onCheckedChange={handleToggleExternalPlayer}
-            aria-label="Use an external player"
-          />
-        </div>
-      ) : (
-        <>
+      <>
+
           <div className="settings-row">
             <div className="settings-info">
               <h3 className="label-lg">mpv Player</h3>
@@ -192,7 +166,6 @@ export const PlayerSettings: React.FC = () => {
             </>
           )}
         </>
-      )}
     </div>
   );
 };

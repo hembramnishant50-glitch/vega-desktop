@@ -134,8 +134,7 @@ export const MetaPage: React.FC = () => {
   const { provider, installedProviders } = useContentStore();
   const { addDownload, downloads, cancelDownload } = useDownloadStore();
   const { watchList, addItem, removeItem } = useWatchListStore();
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const tvMode = settingsStorage.isTvModeEnabled();
   const { ref: focusRef, focusKey } = useFocusable({ focusable: tvMode, trackChildren: true });
 
   const link = decodeURIComponent(url || "");

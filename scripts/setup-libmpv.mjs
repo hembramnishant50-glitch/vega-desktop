@@ -5,9 +5,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
-const windowsResourcesDir = join(rootDir, "src-tauri", "resources", "windows");
-const vcRedistPath = join(windowsResourcesDir, "vc_redist.x64.exe");
-const vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.x64.exe";
+
 const cliPaths = [
   join(rootDir, "node_modules", "tauri-plugin-libmpv-api", "dist-js", "cli.js"),
   join(
@@ -39,20 +37,6 @@ for (const cliPath of cliPaths) {
       `[setup-lib] Pinned mpv-winbuild to release: ${PINNED_MPV_TAG} in ${cliPath}`,
     );
   }
-}
-
-if (process.platform === "win32" && !existsSync(vcRedistPath)) {
-  console.log(
-    "[setup-lib] Downloading Microsoft Visual C++ Redistributable...",
-  );
-  mkdirSync(windowsResourcesDir, { recursive: true });
-  const response = await fetch(vcRedistUrl);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to download Visual C++ Redistributable: ${response.status}`,
-    );
-  }
-  writeFileSync(vcRedistPath, Buffer.from(await response.arrayBuffer()));
 }
 
 execSync("npx tauri-plugin-libmpv-api setup-lib", {

@@ -62,8 +62,7 @@ export const PostCardItem: React.FC<PostCardItemProps> = ({
   focusKey: customFocusKey,
   onFocus: customOnFocus,
 }) => {
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const tvMode = settingsStorage.isTvModeEnabled();
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => setImageFailed(false), [post.image]);

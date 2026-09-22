@@ -11,7 +11,7 @@ Bring your own sources · Stream & download · Sync with mobile
 [![Version](https://img.shields.io/badge/version-2.0.5-9e6cff?style=flat-square)](src-tauri/tauri.conf.json)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-24C8DB?style=flat-square&logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
-[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=flat-square)](#download)
+[![Platform](https://img.shields.io/badge/platform-Omarchy%20Linux%20only-00D4AA?style=flat-square)](#download)
 [![Downloads](https://img.shields.io/github/downloads/vega-org/vega-desktop/total?style=flat-square&label=downloads)](https://github.com/vega-org/vega-desktop/releases)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](#)
 
@@ -53,9 +53,7 @@ Bring your own sources · Stream & download · Sync with mobile
 
 | Platform | Artifact |
 |----------|----------|
-| Linux (Omarchy/Arch) | `AppImage` · `.deb` · `PKGBUILD` — see below |
-| Windows | `.msi` / `.exe` — [Releases](https://github.com/vega-org/vega-desktop/releases/latest) |
-| macOS | `.dmg` — [Releases](https://github.com/vega-org/vega-desktop/releases/latest) |
+| **Omarchy Linux (Arch)** | `AppImage` · `.deb` · `PKGBUILD` — see below |
 
 ---
 
@@ -129,16 +127,6 @@ npm run tauri build      # → src-tauri/target/release/bundle/
 Requires: `mpv`, `libmpv`, `webkit2gtk-4.1`, `gtk3`
 
 ---
-
-### Windows & macOS
-
-```bash
-npm install
-npm run tauri dev
-npm run tauri build      # .exe / .msi / .dmg
-```
-
-Prerequisites: [Tauri Setup](https://tauri.app/start/prerequisites/)
 
 ---
 

@@ -90,8 +90,7 @@ export const Topbar: React.FC = () => {
   const nativeInputRef = useRef<HTMLInputElement>(null);
   const navigatingToSuggestionsRef = useRef(false);
 
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
-  const tvMode = settingsStorage.isTvModeEnabled() || isAndroid;
+  const tvMode = settingsStorage.isTvModeEnabled();
 
   const {
     ref: focusRef,

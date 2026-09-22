@@ -122,7 +122,6 @@ export const PreferencesSettings: React.FC = () => {
     settingsStorage.setDohCustomUrl(val);
   };
 
-  const isAndroid = navigator.userAgent.toLowerCase().includes("android");
 
   const updateDownloadConcurrency = (value: number) => {
     const next = Math.min(Math.max(value, 1), 5);
@@ -157,15 +156,12 @@ export const PreferencesSettings: React.FC = () => {
         <div className="settings-info">
           <h3 className="label-lg">Download Directory</h3>
           <p className="body-md text-muted" style={{ wordBreak: "break-all" }}>
-            {isAndroid
-              ? "Internal App Storage (Recommended for Android)"
-              : downloadLocation === "vega"
-                ? "Default (Documents/VegaDownloads)"
-                : downloadLocation}
+            {downloadLocation === "vega"
+              ? "Default (Documents/VegaDownloads)"
+              : downloadLocation}
           </p>
         </div>
-        {!isAndroid && (
-          <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
             <FocusableButton
               className="theme-toggle-btn active"
               style={{ display: "flex", alignItems: "center", gap: "8px" }}
@@ -182,7 +178,6 @@ export const PreferencesSettings: React.FC = () => {
               </FocusableButton>
             )}
           </div>
-        )}
       </div>
 
       <div className="settings-divider" />

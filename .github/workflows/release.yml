@@ -13,49 +13,15 @@ jobs:
     env:
       VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY || secrets.TMDB_API_KEY }}
       VITE_PROXY_API_URL: ${{ secrets.VITE_PROXY_API_URL || secrets.PROXY_API_URL }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ubuntu-22.04, windows-latest]
-
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Bundle libmpv for macOS
-        if: matrix.platform == 'macos-latest'
-        run: |
-          brew install mpv dylibbundler
-
-          # Copy brew's libmpv into src-tauri/lib/
-          MPV_PREFIX=$(brew --prefix mpv)
-          cp "${MPV_PREFIX}/lib/libmpv.2.dylib" src-tauri/lib/libmpv.2.dylib
-
-          # Collect ALL transitive dependencies into src-tauri/lib/ and rewrite paths
-          dylibbundler -b \
-            -x src-tauri/lib/libmpv.2.dylib \
-            -d src-tauri/lib/ \
-            -p @loader_path/ \
-            -of
-
-          # Also fix libmpv's own install name
-          install_name_tool -id @loader_path/libmpv.2.dylib src-tauri/lib/libmpv.2.dylib
-
-          # Build the frameworks list for tauri.conf.json from all dylibs in lib/
-          FRAMEWORKS=$(find src-tauri/lib -name "*.dylib" | sed 's|src-tauri/||' | jq -R . | jq -s .)
-          # Update tauri.conf.json with the full list
-          jq --argjson fw "$FRAMEWORKS" '.bundle.macOS.frameworks = $fw' src-tauri/tauri.conf.json > src-tauri/tauri.conf.tmp.json
-          mv src-tauri/tauri.conf.tmp.json src-tauri/tauri.conf.json
-
-          echo "Bundled dylibs:"
-          ls -la src-tauri/lib/*.dylib
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -68,8 +34,6 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -85,162 +49,6 @@ jobs:
         with:
           tagName: app-v__VERSION__
           releaseName: "Vega v__VERSION__"
-          releaseBody: "Automated release of Vega."
+          releaseBody: "Automated release of Vega (Omarchy Linux)."
           releaseDraft: true
           includeUpdaterJson: true
-          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}
-
-      - name: Build MSIX (Windows only)
-        if: matrix.platform == 'windows-latest'
-        run: npm run build:msix
-
-      - name: Get version
-        id: version
-        if: matrix.platform == 'windows-latest'
-        run: echo "app_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Upload Windows installers to Release
-        if: matrix.platform == 'windows-latest'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          shopt -s nullglob
-          installers=(
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/msix/*.msix
-          )
-          if [ ${#installers[@]} -eq 0 ]; then
-            echo "No Windows installers found"
-            exit 1
-          fi
-          gh release upload "app-v${{ steps.version.outputs.app_version }}" "${installers[@]}" --clobber
-  release-android:
-    permissions:
-      contents: write
-    env:
-      VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY || secrets.TMDB_API_KEY }}
-      VITE_PROXY_API_URL: ${{ secrets.VITE_PROXY_API_URL || secrets.PROXY_API_URL }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "zulu"
-          java-version: "17"
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install frontend dependencies
-        run: npm install
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./src-tauri -> target"
-
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r26b
-
-      - name: Configure Android NDK toolchain
-        env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: |
-          TOOLCHAIN="$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
-          BIN="$TOOLCHAIN/bin"
-
-          # Add NDK toolchain to PATH
-          echo "$BIN" >> $GITHUB_PATH
-
-          # Create target-prefixed symlinks just in case
-          for target in aarch64-linux-android armv7a-linux-androideabi i686-linux-android x86_64-linux-android; do
-            ln -sf "$BIN/llvm-ranlib" "$BIN/${target}-ranlib"
-            ln -sf "$BIN/llvm-ar" "$BIN/${target}-ar"
-            ln -sf "$BIN/llvm-strip" "$BIN/${target}-strip"
-          done
-
-          # Set CC, AR, and RANLIB for each Android target (using underscores for cc-rs)
-          echo "CC_aarch64_linux_android=${BIN}/aarch64-linux-android21-clang" >> $GITHUB_ENV
-          echo "AR_aarch64_linux_android=${BIN}/llvm-ar" >> $GITHUB_ENV
-          echo "RANLIB_aarch64_linux_android=${BIN}/llvm-ranlib" >> $GITHUB_ENV
-
-          echo "CC_armv7_linux_androideabi=${BIN}/armv7a-linux-androideabi21-clang" >> $GITHUB_ENV
-          echo "AR_armv7_linux_androideabi=${BIN}/llvm-ar" >> $GITHUB_ENV
-          echo "RANLIB_armv7_linux_androideabi=${BIN}/llvm-ranlib" >> $GITHUB_ENV
-
-          echo "CC_i686_linux_android=${BIN}/i686-linux-android21-clang" >> $GITHUB_ENV
-          echo "AR_i686_linux_android=${BIN}/llvm-ar" >> $GITHUB_ENV
-          echo "RANLIB_i686_linux_android=${BIN}/llvm-ranlib" >> $GITHUB_ENV
-
-          echo "CC_x86_64_linux_android=${BIN}/x86_64-linux-android21-clang" >> $GITHUB_ENV
-          echo "AR_x86_64_linux_android=${BIN}/llvm-ar" >> $GITHUB_ENV
-          echo "RANLIB_x86_64_linux_android=${BIN}/llvm-ranlib" >> $GITHUB_ENV
-
-          # Configure cargo linkers
-          mkdir -p ~/.cargo
-          cat >> ~/.cargo/config.toml << EOF
-          [target.aarch64-linux-android]
-          linker = "${BIN}/aarch64-linux-android21-clang"
-
-          [target.armv7-linux-androideabi]
-          linker = "${BIN}/armv7a-linux-androideabi21-clang"
-
-          [target.i686-linux-android]
-          linker = "${BIN}/i686-linux-android21-clang"
-
-          [target.x86_64-linux-android]
-          linker = "${BIN}/x86_64-linux-android21-clang"
-          EOF
-
-      - name: Build Android APK
-        env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          VITE_TV_MODE: "true"
-        run: npm run tauri android build -- --apk --target aarch64 --target armv7
-
-      - name: Sign APK
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          # 1. Decode Keystore
-          echo "$KEYSTORE_BASE64" | base64 --decode > release.jks
-
-          # 2. Get the largest unsigned APK path
-          UNSIGNED_APK=$(find src-tauri/gen/android/app/build/outputs/apk -name "*-unsigned.apk" | xargs ls -S | head -n 1)
-
-          # 3. Locate the latest Android Build Tools on the GitHub Runner
-          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
-
-          # 4. Zipalign it
-          $BUILD_TOOLS/zipalign -v -p 4 "$UNSIGNED_APK" app-aligned.apk
-
-          # 5. Sign it
-          $BUILD_TOOLS/apksigner sign --ks release.jks --ks-key-alias "$KEY_ALIAS" --ks-pass pass:"$KEYSTORE_PASSWORD" --key-pass pass:"$KEY_PASSWORD" --out vega-tv-android.apk app-aligned.apk
-
-      - name: Get version
-        id: version
-        run: echo "app_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Upload APK to Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "app-v${{ steps.version.outputs.app_version }}" vega-tv-android.apk --clobber
