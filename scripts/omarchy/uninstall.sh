@@ -38,6 +38,12 @@ if [ -f "$DESKTOP_FILE" ]; then
   rm -f "$DESKTOP_FILE"
   info "Removed ${DESKTOP_FILE}"
 fi
+# stale alias from previous version that caused duplicate entry
+if [ -f "${HOME}/.local/share/applications/vega-desktop.desktop" ]; then
+  rm -f "${HOME}/.local/share/applications/vega-desktop.desktop"
+  info "Removed stale ${HOME}/.local/share/applications/vega-desktop.desktop"
+fi
+update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
 
 # ── 4. Remove icons ──────────────────────────────────────────────────
 # hicolor icons + top-level fallbacks + legacy misnamed

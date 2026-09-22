@@ -111,10 +111,9 @@ Actions=WaylandDebug;
 Name=Wayland Debug (DMABuf off)
 Exec=env GDK_BACKEND=wayland,x11 WEBKIT_DISABLE_DMABUF_RENDERER=1 ${WRAPPER}
 EOF
-# also install vega-desktop alias for PKGBUILD compat
-cp -f "$DESKTOP_FILE" "${HOME}/.local/share/applications/vega-desktop.desktop"
-sed -i 's/^Icon=vega$/Icon=vega-desktop/' "${HOME}/.local/share/applications/vega-desktop.desktop"
-info "Desktop: ${DESKTOP_FILE} + vega-desktop.desktop"
+# remove stale alias from previous installer (caused 2 apps in menu)
+rm -f "${HOME}/.local/share/applications/vega-desktop.desktop" 2>/dev/null || true
+info "Desktop: ${DESKTOP_FILE}"
 update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
 
 # ── 6. Icons (freedesktop hicolor) ──────────────────────────────────
