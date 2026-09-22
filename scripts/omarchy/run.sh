@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Omarchy direct-run (no install) — Wayland-optimized
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,12 +13,14 @@ NC='\033[0m'
 info() { echo -e "${GREEN}[vega]${NC} $*"; }
 error() { echo -e "${RED}[vega]${NC} $*" >&2; exit 1; }
 
+export GDK_BACKEND="${GDK_BACKEND:-wayland,x11}"
+export WEBKIT_DISABLE_DMABUF_RENDERER="${WEBKIT_DISABLE_DMABUF_RENDERER:-0}"
+
 # ── Build mode ────────────────────────────────────────────────────────
 if [ "${1:-}" = "--build" ] || [ "${1:-}" = "--dev" ]; then
-  info "Building and running..."
+  info "Building and running (Wayland)..."
   cd "$REPO_DIR"
-  npm run tauri dev
-  exit $?
+  exec npm run tauri dev -- "$@"
 fi
 
 # ── Prebuilt binary ──────────────────────────────────────────────────
@@ -30,4 +33,4 @@ fi
 # ── Dev fallback ──────────────────────────────────────────────────────
 info "No prebuilt binary found. Starting dev mode..."
 cd "$REPO_DIR"
-exec npm run tauri dev
+exec npm run tauri dev -- "$@"

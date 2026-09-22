@@ -5,11 +5,6 @@
 set -euo pipefail
 
 OMARCHY_THEME_DIR="$HOME/.config/omarchy/current/theme"
-OMARCHY_COLORS=""
-if [[ -f "$HOME/.config/omarchy/themes/macchiato-core/colors.toml" ]]; then
-  # fallback
-  true
-fi
 
 # Try to locate colors.toml for current theme
 find_accent() {
@@ -86,5 +81,9 @@ else
   echo "[vega-theme-sync] Or set via localStorage in DevTools: localStorage.setItem('theme-storage', JSON.stringify({state:{primary:'$ACCENT',isCustom:true}}))"
 fi
 
-# Also offer to write a CSS override for future builds
+# Optional: hook into Omarchy theme changes (uncomment to auto-sync on theme switch)
+# mkdir -p ~/.config/omarchy/hooks
+# ln -sf "$(realpath "$0")" ~/.config/omarchy/hooks/theme-changed.sh
+
 echo "[vega-theme-sync] Done. Restart Vega to apply if it was running."
+echo "[vega-theme-sync] Tip: Omarchy Settings → Theme Sync in-app does this without restart."

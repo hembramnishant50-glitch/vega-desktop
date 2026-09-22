@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=AudioVideo;Player;Video;
-Comment=Native desktop app for streaming media - MPV powered, ad-free
-Exec=vega-desktop %U
+Comment=Native desktop app for streaming media - MPV powered, ad-free (Omarchy optimized)
+Exec=env GDK_BACKEND=wayland,x11 WEBKIT_DISABLE_DMABUF_RENDERER=0 vega-desktop %U
 GenericName=Media Center
 Icon=vega-desktop
 Keywords=streaming;media;mpv;video;watchlist;torrent;
@@ -9,11 +9,17 @@ MimeType=x-scheme-handler/vega;
 Name=Vega
 StartupNotify=true
 StartupWMClass=Vega
+SingleMainWindow=true
+DBusActivatable=false
 Terminal=false
 Type=Application
 Version=1.5
-Actions=DevTools;
+Actions=DevTools;WaylandDebug;
 
 [Desktop Action DevTools]
 Name=Open with DevTools
-Exec=vega-desktop --devtools
+Exec=env GDK_BACKEND=wayland,x11 vega-desktop --devtools
+
+[Desktop Action WaylandDebug]
+Name=Wayland Debug (DMABuf off)
+Exec=env GDK_BACKEND=wayland,x11 WEBKIT_DISABLE_DMABUF_RENDERER=1 vega-desktop

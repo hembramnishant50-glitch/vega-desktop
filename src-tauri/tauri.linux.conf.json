@@ -1,12 +1,12 @@
 {
   "bundle": {
-    "resources": ["lib/*.so"],
+    "resources": [],
     "linux": {
       "deb": {
         "depends": ["libmpv2", "mpv", "webkit2gtk-4.1"]
       },
       "appimage": {
-        "bundleMediaFramework": true
+        "bundleMediaFramework": false
       }
     }
   },

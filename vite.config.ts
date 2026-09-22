@@ -39,6 +39,9 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.VITE_TMDB_API_KEY": JSON.stringify(tmdbApiKey),
       "import.meta.env.VITE_PROXY_API_URL": JSON.stringify(proxyApiUrl),
     },
+    build: {
+      chunkSizeWarningLimit: 1200,
+    },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //

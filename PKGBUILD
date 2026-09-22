@@ -30,7 +30,7 @@ makedepends=(
   'pkgconf'
 )
 optdepends=(
-  'vlc: external player support'
+  'mpv-mpris: MPRIS media key support'
 )
 source=(
   "vega-desktop-${pkgver}.tar.gz::https://github.com/vega-org/vega-desktop/archive/refs/tags/v${pkgver}.tar.gz"
@@ -59,10 +59,20 @@ package() {
   fi
   # desktop
   install -Dm644 "omarchy/desktop/vega.desktop" "$pkgdir/usr/share/applications/vega-desktop.desktop"
-  # icons
-  install -Dm644 "src-tauri/icons/128x128.png" "$pkgdir/usr/share/icons/hicolor/128x128/apps/vega-desktop.png"
-  install -Dm644 "src-tauri/icons/32x32.png" "$pkgdir/usr/share/icons/hicolor/32x32/apps/vega-desktop.png"
-  install -Dm644 "src-tauri/icons/icon.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/vega-desktop.png"
+  # icons (all sizes + scalable)
+  for s in 32 64 128 256 512; do
+    if [[ -f "src-tauri/icons/icon-${s}x${s}.png" ]]; then
+      install -Dm644 "src-tauri/icons/icon-${s}x${s}.png" "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/vega-desktop.png"
+    elif [[ -f "src-tauri/icons/${s}x${s}.png" ]]; then
+      install -Dm644 "src-tauri/icons/${s}x${s}.png" "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/vega-desktop.png"
+    fi
+  done
+  [[ -f "src-tauri/icons/icon-rounded.svg" ]] && install -Dm644 "src-tauri/icons/icon-rounded.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/vega-desktop.svg"
+  # compat alias for Icon=vega (local install)
+  for s in 32 64 128 256 512; do
+    [[ -f "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/vega-desktop.png" ]] && cp -f "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/vega-desktop.png" "$pkgdir/usr/share/icons/hicolor/${s}x${s}/apps/vega.png"
+  done
+  [[ -f "$pkgdir/usr/share/icons/hicolor/scalable/apps/vega-desktop.svg" ]] && cp -f "$pkgdir/usr/share/icons/hicolor/scalable/apps/vega-desktop.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/vega.svg"
   # hyprland example (docs)
   install -Dm644 "omarchy/hypr/vega.lua" "$pkgdir/usr/share/doc/vega-desktop/hypr-vega.lua.example"
 }

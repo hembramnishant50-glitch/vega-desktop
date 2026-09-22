@@ -6,7 +6,8 @@ fn main() {
 
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
 
-    // Auto-copy libmpv dynamic libraries next to the output binary so they can be loaded at runtime (Windows, macOS & Linux)
+    // Auto-copy libmpv wrapper next to binary.
+    // On Linux/Omarchy, prefer system libmpv (pacman -S mpv libmpv) — only copy wrapper, skip bundling system .so.
     if target_os == "windows" || target_os == "macos" || target_os == "linux" {
         let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap_or_default());
         // OUT_DIR is deep in target/debug/build/..., walk up to target/debug/
@@ -20,10 +21,10 @@ fn main() {
             let libs = if target_os == "windows" {
                 vec!["libmpv-wrapper.dll", "libmpv-2.dll"]
             } else if target_os == "macos" {
-                // On macOS, developers might name it libmpv.dylib or libmpv.2.dylib
                 vec!["libmpv-wrapper.dylib", "libmpv.dylib", "libmpv.2.dylib"]
             } else {
-                vec!["libmpv-wrapper.so", "libmpv.so", "libmpv.so.2"]
+                // Omarchy/Arch: only wrapper, system provides libmpv.so
+                vec!["libmpv-wrapper.so"]
             };
 
             for lib_name in libs {

@@ -87,42 +87,62 @@ EOF
 chmod +x "$WRAPPER"
 info "Wrapper: ${WRAPPER}"
 
-# ── 5. Desktop entry ──────────────────────────────────────────────────
+# ── 5. Desktop entry (Omarchy Wayland-optimized) ───────────────────
 mkdir -p "$(dirname "$DESKTOP_FILE")"
 cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Vega
-Exec=${WRAPPER}
+GenericName=Media Center
+Comment=Native streaming - MPV powered, Omarchy optimized
+Exec=env GDK_BACKEND=wayland,x11 WEBKIT_DISABLE_DMABUF_RENDERER=0 ${WRAPPER} %U
 Icon=vega
-Categories=AudioVideo;Player;
+Categories=AudioVideo;Player;Video;
+Keywords=streaming;media;mpv;video;
+MimeType=x-scheme-handler/vega;
+StartupNotify=true
+StartupWMClass=Vega
+SingleMainWindow=true
 Terminal=false
-StartupWMClass=vega
+Version=1.5
+Actions=WaylandDebug;
+
+[Desktop Action WaylandDebug]
+Name=Wayland Debug (DMABuf off)
+Exec=env GDK_BACKEND=wayland,x11 WEBKIT_DISABLE_DMABUF_RENDERER=1 ${WRAPPER}
 EOF
-info "Desktop: ${DESKTOP_FILE}"
+# also install vega-desktop alias for PKGBUILD compat
+cp -f "$DESKTOP_FILE" "${HOME}/.local/share/applications/vega-desktop.desktop"
+sed -i 's/^Icon=vega$/Icon=vega-desktop/' "${HOME}/.local/share/applications/vega-desktop.desktop"
+info "Desktop: ${DESKTOP_FILE} + vega-desktop.desktop"
+update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
 
 # ── 6. Icons (freedesktop hicolor) ──────────────────────────────────
-# Install to hicolor so Icon=vega resolves in any theme
+# Install as BOTH vega and vega-desktop for compat (PKGBUILD vs local)
 for size in 32 64 128 256 512; do
   src="src-tauri/icons/icon-${size}x${size}.png"
   [ -f "$src" ] || src="src-tauri/icons/${size}x${size}.png"
   if [ -f "$src" ]; then
     mkdir -p "${ICON_DIR}/hicolor/${size}x${size}/apps"
     cp -f "$src" "${ICON_DIR}/hicolor/${size}x${size}/apps/vega.png"
+    cp -f "$src" "${ICON_DIR}/hicolor/${size}x${size}/apps/vega-desktop.png"
   fi
 done
-# scalable + top-level fallback (some launchers check ~/.local/share/icons/vega.png)
 if [ -f "src-tauri/icons/icon-rounded.svg" ]; then
   mkdir -p "${ICON_DIR}/hicolor/scalable/apps"
   cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/hicolor/scalable/apps/vega.svg"
+  cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/hicolor/scalable/apps/vega-desktop.svg"
   cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/vega.svg"
+  cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/vega-desktop.svg"
 fi
-[ -f "src-tauri/icons/icon-512x512.png" ] && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega.png"
-# cleanup legacy misnamed icons from previous installer
+[ -f "src-tauri/icons/icon-512x512.png" ] && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega.png" && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega-desktop.png"
 rm -f "${ICON_DIR}"/vega-*.png 2>/dev/null || true
+# restore correct top-level fallbacks after wildcard cleanup
+[ -f "src-tauri/icons/icon-512x512.png" ] && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega.png" && cp -f "src-tauri/icons/icon-512x512.png" "${ICON_DIR}/vega-desktop.png"
+[ -f "src-tauri/icons/icon-rounded.svg" ] && cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/vega.svg" && cp -f "src-tauri/icons/icon-rounded.svg" "${ICON_DIR}/vega-desktop.svg"
 gtk-update-icon-cache -f -t "${ICON_DIR}/hicolor" 2>/dev/null || true
 update-desktop-database "$(dirname "$DESKTOP_FILE")" 2>/dev/null || true
-info "Icons installed to ${ICON_DIR}/hicolor"
+info "Icons installed to ${ICON_DIR}/hicolor (vega + vega-desktop)"
 
 # ── 7. Hyprland window rules ──────────────────────────────────────────
 if [ -f "$HYPR_CONFIG" ]; then
